@@ -24,7 +24,6 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_mingw'
-        modules: 'qtbase qtwidgets'
         cache: true
         
     - name: 配置CMake
@@ -86,7 +85,6 @@ jobs:
         version: '6.9.0'
         host: 'linux'
         target: 'desktop'
-        modules: 'qtbase qtwidgets'
         cache: true
         
     - name: 安装依赖
@@ -142,7 +140,6 @@ jobs:
         version: '6.9.0'
         host: 'mac'
         target: 'desktop'
-        modules: 'qtbase qtwidgets'
         cache: true
         
     - name: 配置CMake
