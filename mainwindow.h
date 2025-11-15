@@ -1,14 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QTableWidget>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QLabel>
-#include <QMessageBox>
+#include "ElaWindow.h"
+#include "ElaTableView.h"
+#include "ElaLineEdit.h"
+#include "ElaPushButton.h"
+#include "ElaComboBox.h"
+#include "ElaSpinBox.h"
+#include "ElaText.h"
+#include "ElaMessageBar.h"
+#include "ElaContentDialog.h"
+#include "cardwidget.h"
+#include <QStandardItemModel>
 #include <QVector>
 #include "student.h"
 
@@ -18,7 +21,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class MainWindow : public ElaWindow
 {
     Q_OBJECT
 
@@ -33,29 +36,33 @@ private slots:
     void onSearchStudent();     // 搜索学生
     void onClearInput();        // 清空输入框
     void onRefreshTable();      // 刷新表格
+    void onSortById();          // 按学号排序
     void onTableItemClicked(int row, int column);  // 表格项点击
 
 private:
     Ui::MainWindow *ui;
     
-    // UI控件
-    QTableWidget *tableWidget;
-    QLineEdit *lineEditId;
-    QLineEdit *lineEditName;
-    QComboBox *comboBoxGender;
-    QSpinBox *spinBoxAge;
-    QLineEdit *lineEditMajor;
-    QLineEdit *lineEditSearch;
+    // UI控件 - 使用 Ela 组件
+    ElaTableView *tableWidget;
+    QStandardItemModel *tableModel;
+    ElaLineEdit *lineEditId;
+    ElaLineEdit *lineEditName;
+    ElaComboBox *comboBoxGender;
+    ElaSpinBox *spinBoxAge;
+    ElaLineEdit *lineEditMajor;
+    ElaLineEdit *lineEditSearch;
     
-    QPushButton *btnAdd;
-    QPushButton *btnDelete;
-    QPushButton *btnModify;
-    QPushButton *btnSearch;
-    QPushButton *btnClear;
-    QPushButton *btnRefresh;
+    ElaPushButton *btnAdd;
+    ElaPushButton *btnDelete;
+    ElaPushButton *btnModify;
+    ElaPushButton *btnSearch;
+    ElaPushButton *btnClear;
+    ElaPushButton *btnRefresh;
+    ElaPushButton *btnSort;
     
     // 数据存储
     QVector<Student> students;
+    QString currentEditingStudentId;  // 当前正在编辑的学生原始学号
     
     // 辅助方法
     void initUI();              // 初始化界面

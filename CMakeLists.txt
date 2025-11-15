@@ -12,6 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+# 添加 ElaWidgetTools 库
+add_subdirectory(ElaWidgetTools/ElaWidgetTools)
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -19,6 +22,7 @@ set(PROJECT_SOURCES
         mainwindow.ui
         student.cpp
         student.h
+        cardwidget.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -44,7 +48,22 @@ else()
     endif()
 endif()
 
-target_link_libraries(StudentSystem PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_include_directories(StudentSystem PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/ElaWidgetTools/ElaWidgetTools
+)
+
+target_link_libraries(StudentSystem PRIVATE 
+    Qt${QT_VERSION_MAJOR}::Widgets
+    ElaWidgetTools
+)
+
+# 自动复制 ElaWidgetTools.dll 到程序目录
+add_custom_command(TARGET StudentSystem POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:ElaWidgetTools>
+        $<TARGET_FILE_DIR:StudentSystem>
+    COMMENT "正在复制 ElaWidgetTools.dll 到程序目录..."
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -57,7 +76,7 @@ set_target_properties(StudentSystem PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    WIN32_EXECUTABLE $<IF:$<CONFIG:Debug>,FALSE,TRUE>  # Debug模式显示控制台
 )
 
 include(GNUInstallDirs)

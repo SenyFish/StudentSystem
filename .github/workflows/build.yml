@@ -30,10 +30,10 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       
     # 步骤3: 安装Qt开发环境
-    - name: 🔧 安装Qt 6.7.3
+    - name: 🔧 安装Qt 6.6.3
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.7.3'           # Qt版本（6.9.0暂不支持MSVC，使用稳定版6.7.3）
+        version: '6.6.3'           # Qt版本（ElaWidgetTools推荐6.6.3以获得最佳兼容性）
         host: 'windows'            # 主机平台
         target: 'desktop'          # 目标平台
         arch: 'win64_msvc2019_64'  # 架构：MSVC 2019 64位
@@ -57,6 +57,19 @@ jobs:
       run: |
         cd build\Release
         windeployqt StudentSystem.exe
+        
+        # 复制 ElaWidgetTools 库文件
+        echo "正在复制 ElaWidgetTools 库文件..."
+        if (Test-Path "..\ElaWidgetTools\ElaWidgetTools\ElaWidgetTools.dll") {
+          Copy-Item -Path "..\ElaWidgetTools\ElaWidgetTools\ElaWidgetTools.dll" -Destination "." -Force
+          Write-Host "✅ ElaWidgetTools.dll 复制成功"
+        } else {
+          Write-Host "⚠️ 警告: ElaWidgetTools.dll 未找到，尝试其他路径..."
+          if (Test-Path "..\ElaWidgetTools\ElaWidgetTools\Release\ElaWidgetTools.dll") {
+            Copy-Item -Path "..\ElaWidgetTools\ElaWidgetTools\Release\ElaWidgetTools.dll" -Destination "." -Force
+            Write-Host "✅ ElaWidgetTools.dll 从Release目录复制成功"
+          }
+        }
         
     # 步骤7: 创建发布包
     - name: 📂 打包发布文件
@@ -85,6 +98,7 @@ jobs:
         # 复制说明文档
         Copy-Item -Path "README.md" -Destination "StudentSystem-Windows\"
         Copy-Item -Path "DEPLOYMENT.md" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
+        Copy-Item -Path "ELAWIDGETTOOLS_INTEGRATION.md" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
         
         # 压缩成ZIP文件
         Compress-Archive -Path "StudentSystem-Windows\*" -DestinationPath "StudentSystem-Windows.zip"
@@ -108,20 +122,40 @@ jobs:
         draft: false               # 不创建草稿
         prerelease: true           # 标记为预发布版本
         body: |
-          ## 🚀 自动构建版本
+          ## 🚀 自动构建版本 - Fluent-UI 现代化界面
+          
+          ✨ **新特性**：现已集成 ElaWidgetTools Fluent-UI 组件库！
           
           这是最新的自动构建版本，每次代码更新都会自动发布。
+          
+          **✨ UI升级亮点**：
+          - 🎨 全新 Microsoft Fluent Design 风格
+          - 🌫️ Windows 11 Acrylic 亚克力模糊效果
+          - 📦 3D 卡片设计，精致阴影和圆角
+          - ✨ 流畅的动画和过渡效果
+          - 💬 现代化非侵入式消息提示
+          - 🖼️ 无边框现代化窗口
+          - 🎭 支持亮色/暗色主题切换
           
           **构建信息**：
           - 📅 构建时间：${{ github.event.head_commit.timestamp }}
           - 🔨 提交信息：${{ github.event.head_commit.message }}
           - 👤 提交者：${{ github.event.head_commit.author.name }}
           - 🔗 提交SHA：${{ github.sha }}
+          - 🎨 UI框架：ElaWidgetTools (Fluent-UI)
+          - 🛠️ Qt版本：6.6.3
           
           **下载说明**：
           1. 下载 `StudentSystem-Windows.zip`
           2. 解压到任意目录
           3. 双击 `StudentSystem.exe` 运行
+          4. 查看 `ELAWIDGETTOOLS_INTEGRATION.md` 了解新界面特性
+          
+          **系统要求**：
+          - Windows 10/11 (64位)
+          - 推荐 Windows 11 以获得完整亚克力效果
+          - 无需安装Qt环境
+          - 无需额外依赖
           
           **注意**：这是开发版本，可能包含未经充分测试的新功能。
           如需稳定版本，请下载正式发布的版本（v1.0.0等）。
@@ -129,7 +163,7 @@ jobs:
           ---
           
           📖 [使用文档](https://github.com/SenyFish/StudentSystem/blob/main/README.md) | 
-          ❓ [常见问题](https://github.com/SenyFish/StudentSystem/blob/main/DOWNLOAD.md)
+          🎨 [UI集成说明](https://github.com/SenyFish/StudentSystem/blob/main/ELAWIDGETTOOLS_INTEGRATION.md) | 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
@@ -143,23 +177,43 @@ jobs:
         prerelease: false           # 不标记为预发布版本
         generate_release_notes: true # 自动生成发布说明
         body: |
-          ## 🎉 正式发布版本
+          ## 🎉 正式发布版本 - Fluent-UI 现代化界面
+          
+          ✨ **全新界面**：采用 Microsoft Fluent Design 设计语言！
           
           这是经过测试的稳定版本，推荐生产环境使用。
+          
+          **✨ 主要特性**：
+          - 🎨 现代化 Fluent-UI 风格界面
+          - 🌫️ Acrylic 亚克力玻璃效果（Windows 11）
+          - 📦 精美 3D 卡片设计
+          - 📊 学生信息增删改查功能
+          - 🔍 智能搜索和排序
+          - ✨ 流畅的动画效果
+          - 💬 友好的用户提示
+          - 🎭 支持主题切换
           
           **下载说明**：
           1. 下载下方的 `StudentSystem-Windows.zip`
           2. 解压到任意目录
           3. 双击 `StudentSystem.exe` 运行
+          4. 查看 `ELAWIDGETTOOLS_INTEGRATION.md` 了解UI特性
           
           **系统要求**：
           - Windows 10/11 (64位)
+          - 推荐 Windows 11 以获得完整亚克力效果
           - 无需安装Qt环境
+          - 无需额外依赖
+          
+          **技术栈**：
+          - Qt 6.6.3
+          - ElaWidgetTools (Fluent-UI)
+          - C++17
           
           ---
           
           📖 [完整文档](https://github.com/SenyFish/StudentSystem) | 
-          📝 [更新日志](https://github.com/SenyFish/StudentSystem/blob/main/CHANGELOG.md)
+          🎨 [UI集成说明](https://github.com/SenyFish/StudentSystem/blob/main/ELAWIDGETTOOLS_INTEGRATION.md) | 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
