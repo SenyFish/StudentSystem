@@ -45,7 +45,7 @@
 #### Windows自动构建流程
 1. 📥 **检出代码** - 从GitHub仓库获取最新代码
 2. 🔧 **设置MSVC** - 配置Microsoft Visual C++编译环境
-3. 🔧 **安装Qt 6.9.0** - 自动安装Qt开发环境（MSVC 2019 64位版本）
+3. 🔧 **安装Qt 6.7.3** - 自动安装Qt开发环境（MSVC 2019 64位版本）
 4. ⚙️ **配置CMake** - 使用CMake配置项目
 5. 🔨 **编译项目** - 编译Release版本
 6. 📦 **部署Qt依赖** - 使用windeployqt自动部署所有DLL和插件
@@ -53,7 +53,9 @@
 8. ⬆️ **上传构建产物** - 上传到GitHub Actions（保留30天）
 9. 🚀 **创建Release** - 如果是版本标签，自动创建GitHub Release
 
-**注意**：使用MSVC编译器而非MinGW，因为GitHub Actions环境中MSVC更稳定可靠。
+**注意**：
+- 使用MSVC编译器而非MinGW，因为GitHub Actions环境中MSVC更稳定可靠
+- 使用Qt 6.7.3（LTS长期支持版本）而非6.9.0，因为6.7.3对MSVC支持更好且更稳定
 
 ## 如何使用
 
@@ -112,8 +114,15 @@ git push origin v1.0.0
 - name: 安装Qt
   uses: jurplel/install-qt-action@v4
   with:
-    version: '6.9.0'  # 改为你需要的版本，如 '6.5.3'
+    version: '6.7.3'  # 改为你需要的版本，推荐LTS版本如 '6.5.3' 或 '6.7.3'
 ```
+
+**推荐版本**：
+- **Qt 6.7.3** (LTS) - 长期支持版本，稳定可靠 ✅
+- **Qt 6.5.3** (LTS) - 另一个LTS版本
+- **Qt 6.2.4** (LTS) - 较旧但非常稳定
+
+**注意**：避免使用最新的非LTS版本（如6.8.x、6.9.x），因为GitHub Actions支持可能不完善。
 
 ### 添加更多Qt模块
 

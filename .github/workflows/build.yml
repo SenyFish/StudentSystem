@@ -26,10 +26,10 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       
     # 步骤3: 安装Qt开发环境
-    - name: 🔧 安装Qt 6.9.0
+    - name: 🔧 安装Qt 6.7.3
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.9.0'           # Qt版本
+        version: '6.7.3'           # Qt版本（6.9.0暂不支持MSVC，使用稳定版6.7.3）
         host: 'windows'            # 主机平台
         target: 'desktop'          # 目标平台
         arch: 'win64_msvc2019_64'  # 架构：MSVC 2019 64位

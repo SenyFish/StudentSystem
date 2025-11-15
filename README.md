@@ -1,7 +1,7 @@
 # 学生信息管理系统
 
 [![Build Status](https://github.com/SenyFish/StudentSystem/actions/workflows/build.yml/badge.svg)](https://github.com/SenyFish/StudentSystem/actions)
-[![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io/)
+[![Qt](https://img.shields.io/badge/Qt-6.7.3%20LTS-green.svg)](https://www.qt.io/)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://github.com/SenyFish/StudentSystem)
 [![Release](https://img.shields.io/github/v/release/SenyFish/StudentSystem)](https://github.com/SenyFish/StudentSystem/releases)
 
@@ -26,10 +26,10 @@
 
 ## 技术栈
 
-- **Qt 6.9.0** - GUI框架
+- **Qt 6.7.3 LTS** - GUI框架（长期支持版本）
 - **C++17** - 编程语言
 - **CMake** - 构建系统
-- **MinGW** - 编译器
+- **MinGW/MSVC** - 编译器（本地开发使用MinGW，GitHub Actions使用MSVC）
 
 ## 项目结构
 
