@@ -19,6 +19,8 @@ jobs:
     # 设置权限：允许创建和更新Releases
     permissions:
       contents: write        # 允许创建Release和上传文件
+      actions: read          # 允许读取Actions
+      pull-requests: write   # 允许操作PR
       
     steps:
     # 步骤1: 检出代码
@@ -141,18 +143,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    # 步骤10: 自动创建并推送版本标签
-    - name: 🏷️ 创建版本标签
-      if: github.ref == 'refs/heads/main'
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -a ${{ steps.version.outputs.new_version }} -m "Auto-release ${{ steps.version.outputs.new_version }}"
-        git push origin ${{ steps.version.outputs.new_version }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    # 步骤11: 创建正式发布版本（每次构建成功后自动发布）
+    # 步骤10: 创建正式发布版本（每次构建成功后自动发布）
     - name: 🎉 发布正式版本
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
