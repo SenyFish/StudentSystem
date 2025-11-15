@@ -97,10 +97,8 @@ jobs:
         # 复制翻译文件
         Copy-Item -Path "build\Release\translations" -Destination "StudentSystem-Windows\translations" -Recurse -ErrorAction SilentlyContinue
         
-        # 复制说明文档
+        # 复制说明文档（仅README.md）
         Copy-Item -Path "README.md" -Destination "StudentSystem-Windows\"
-        Copy-Item -Path "DEPLOYMENT.md" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
-        Copy-Item -Path "ELAWIDGETTOOLS_INTEGRATION.md" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
         
         # 压缩成ZIP文件
         Compress-Archive -Path "StudentSystem-Windows\*" -DestinationPath "StudentSystem-Windows.zip"
@@ -195,7 +193,6 @@ jobs:
           1. 下载下方的 `StudentSystem-Windows.zip`
           2. 解压到任意目录
           3. 双击 `StudentSystem.exe` 运行
-          4. 查看 `ELAWIDGETTOOLS_INTEGRATION.md` 了解UI特性
           
           **系统要求**：
           - Windows 10/11 (64位)
@@ -210,9 +207,7 @@ jobs:
           
           ---
           
-          📖 [完整文档](https://github.com/SenyFish/StudentSystem) | 
-          🎨 [UI集成说明](https://github.com/SenyFish/StudentSystem/blob/main/ELAWIDGETTOOLS_INTEGRATION.md) | 
-          📝 [更新日志](https://github.com/SenyFish/StudentSystem/blob/main/CHANGELOG.md)
+          📖 [完整文档](https://github.com/SenyFish/StudentSystem)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
