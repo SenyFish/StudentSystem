@@ -19,9 +19,9 @@ GitHub Actions会在以下情况自动运行：
 1. 进入 [Actions页面](https://github.com/SenyFish/StudentSystem/actions)
 2. 点击最新的成功构建
 3. 在底部 **Artifacts** 下载：
-   - `StudentSystem-Windows.zip` - Windows版本（已包含所有DLL）
-   - `StudentSystem-Linux.tar.gz` - Linux版本
-   - `StudentSystem-macOS` - macOS版本
+   - `StudentSystem-Windows.zip` - Windows完整安装包（已包含所有DLL和依赖）
+
+**说明**：本项目仅构建Windows版本，解压后可在任何Windows 10/11电脑上直接运行，无需安装Qt！
 
 ### 发布新版本
 
@@ -43,19 +43,23 @@ git push origin v1.0.0
 ## 📦 构建产物说明
 
 ### Windows版本
-- 完整打包，包含所有Qt依赖
-- 解压即用，无需安装Qt
-- 使用windeployqt自动部署
+本项目专注于Windows平台，提供完整的安装包：
 
-### Linux版本
-- 编译好的二进制文件
-- 需要系统安装Qt库
-- 或使用AppImage格式（待实现）
+- ✅ **完整打包** - 包含所有Qt依赖和插件
+- ✅ **解压即用** - 无需安装Qt环境
+- ✅ **自动部署** - 使用windeployqt自动部署所有依赖
+- ✅ **支持系统** - Windows 10/11（64位）
+- ✅ **包含文档** - 附带使用说明和部署文档
 
-### macOS版本
-- 标准DMG安装包
-- 包含完整.app应用
-- 使用macdeployqt打包
+**文件大小**：约80-100MB（压缩后）
+
+**包含内容**：
+- StudentSystem.exe（主程序）
+- Qt6运行时库（Core、Gui、Widgets等）
+- MinGW运行时（libgcc、libstdc++等）
+- Qt插件（platforms、styles、imageformats等）
+- 中文翻译文件
+- 项目文档
 
 ## 🛠️ 本地开发
 

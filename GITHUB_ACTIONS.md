@@ -1,14 +1,15 @@
 # GitHub Actions 自动化构建和发布
 
-本项目配置了GitHub Actions自动化工作流，可以自动编译、打包和发布Qt应用程序。
+本项目配置了GitHub Actions自动化工作流，可以自动编译、打包和发布Qt应用程序的Windows版本。
 
 ## 功能特性
 
 ✅ **自动编译** - 每次推送到main分支时自动编译  
-✅ **多平台支持** - 支持Windows、Linux、macOS三个平台  
-✅ **自动部署** - 自动使用windeployqt/macdeployqt打包依赖  
-✅ **构建产物** - 自动生成可分发的压缩包  
+✅ **Windows平台** - 自动构建Windows版本（已配置MinGW编译环境）  
+✅ **自动部署** - 自动使用windeployqt打包所有Qt依赖  
+✅ **构建产物** - 自动生成可直接运行的Windows安装包  
 ✅ **自动发布** - 推送tag时自动创建GitHub Release  
+✅ **完全汉化** - 工作流配置文件已完全汉化，易于理解  
 
 ## 工作流说明
 
@@ -39,29 +40,17 @@
 
 ### 构建步骤
 
-#### Windows构建
-1. 检出代码
-2. 安装Qt 6.9.0 (MinGW)
-3. 使用CMake配置项目
-4. 编译Release版本
-5. 使用windeployqt部署Qt依赖
-6. 打包成ZIP文件
-7. 上传构建产物
+本项目仅构建Windows版本，构建过程如下：
 
-#### Linux构建
-1. 检出代码
-2. 安装Qt 6.9.0
-3. 安装系统依赖
-4. 使用CMake配置和编译
-5. 打包成tar.gz文件
-6. 上传构建产物
-
-#### macOS构建
-1. 检出代码
-2. 安装Qt 6.9.0
-3. 使用CMake配置和编译
-4. 使用macdeployqt创建DMG文件
-5. 上传构建产物
+#### Windows自动构建流程
+1. 📥 **检出代码** - 从GitHub仓库获取最新代码
+2. 🔧 **安装Qt 6.9.0** - 自动安装Qt开发环境（MinGW 64位）
+3. ⚙️ **配置CMake** - 使用MinGW Makefiles生成构建文件
+4. 🔨 **编译项目** - 编译Release版本
+5. 📦 **部署Qt依赖** - 使用windeployqt自动部署所有DLL和插件
+6. 📂 **打包发布文件** - 复制所有必需文件并打包成ZIP
+7. ⬆️ **上传构建产物** - 上传到GitHub Actions（保留30天）
+8. 🚀 **创建Release** - 如果是版本标签，自动创建GitHub Release
 
 ## 如何使用
 
@@ -75,9 +64,9 @@
 1. 进入 **Actions** 标签
 2. 选择一个成功的工作流运行
 3. 在 **Artifacts** 部分下载：
-   - `StudentSystem-Windows.zip` - Windows版本
-   - `StudentSystem-Linux.tar.gz` - Linux版本
-   - `StudentSystem-macOS` - macOS版本
+   - `StudentSystem-Windows.zip` - Windows完整安装包（包含所有依赖）
+
+**说明**：解压后即可在任何Windows电脑上直接运行，无需安装Qt环境！
 
 ### 3. 创建正式发布版本
 
@@ -96,7 +85,7 @@ git push origin v1.0.0
 这将自动：
 - 触发构建流程
 - 创建GitHub Release
-- 上传所有平台的安装包
+- 上传Windows安装包
 - 生成Release说明
 
 ## 添加构建状态徽章
@@ -178,22 +167,43 @@ on:
 ## 构建产物说明
 
 ### Windows版本 (StudentSystem-Windows.zip)
-包含内容：
-- `StudentSystem.exe` - 主程序
-- 所有Qt DLL文件
-- `platforms/` - 平台插件
-- `styles/` - 样式插件
-- `imageformats/` - 图像格式插件
-- `translations/` - 翻译文件
-- `README.md` - 说明文档
+这是一个完整的Windows安装包，包含以下内容：
 
-用户只需解压即可运行，无需安装Qt。
+**主程序**：
+- `StudentSystem.exe` - 学生管理系统主程序
 
-### Linux版本 (StudentSystem-Linux.tar.gz)
-包含编译好的二进制文件，需要系统安装了Qt库或使用AppImage格式。
+**Qt运行时库**：
+- `Qt6Core.dll` - Qt核心库
+- `Qt6Gui.dll` - Qt GUI库
+- `Qt6Widgets.dll` - Qt Widgets库
+- `Qt6Network.dll` - Qt网络库
+- `Qt6Svg.dll` - Qt SVG库
 
-### macOS版本 (StudentSystem.dmg)
-包含完整的.app应用包，可直接安装使用。
+**MinGW运行时**：
+- `libgcc_s_seh-1.dll` - GCC运行时
+- `libstdc++-6.dll` - C++标准库
+- `libwinpthread-1.dll` - 线程库
+
+**Qt插件**：
+- `platforms/` - Windows平台插件
+- `styles/` - 现代Windows样式插件
+- `imageformats/` - 图像格式支持（GIF、JPEG、PNG、SVG等）
+- `iconengines/` - SVG图标引擎
+- `generic/` - 通用插件
+- `networkinformation/` - 网络信息插件
+- `tls/` - TLS/SSL支持
+
+**翻译文件**：
+- `translations/` - 包含中文简体等多语言翻译
+
+**文档**：
+- `README.md` - 项目说明文档
+- `DEPLOYMENT.md` - 部署说明文档
+
+**使用方式**：
+1. 解压ZIP文件到任意目录
+2. 双击运行 `StudentSystem.exe`
+3. 无需安装Qt或其他依赖！
 
 ## 本地测试工作流
 
@@ -227,8 +237,8 @@ ERROR: The packages ['qtbase', 'qtwidgets'] were not found
 ### Q4: Release未自动创建
 **A**: 确保推送了tag，且tag名称以'v'开头（如v1.0.0）。检查GITHUB_TOKEN权限。
 
-### Q5: 想要禁用某个平台的构建
-**A**: 在build.yml中注释掉或删除对应的job即可。
+### Q5: 想要添加Linux或macOS构建
+**A**: 可以参考Qt官方文档添加对应平台的构建job。当前版本仅构建Windows版本以简化流程。
 
 ### Q6: 构建产物保留时间
 **A**: 默认保留30天，可修改 `retention-days` 参数。
@@ -263,7 +273,7 @@ ERROR: The packages ['qtbase', 'qtwidgets'] were not found
 
 - GitHub Actions对**公开仓库完全免费**，无限制使用
 - 私有仓库每月有免费配额（2000分钟）
-- 多平台构建会消耗更多分钟数，但对公开仓库无影响
+- 每次Windows构建大约消耗5-10分钟
 
 ## 参考资源
 

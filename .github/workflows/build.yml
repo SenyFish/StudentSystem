@@ -1,177 +1,103 @@
-name: Build and Release Qt Application
+name: 构建和发布Qt学生管理系统
 
+# 触发条件
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]      # 推送到main分支时触发
     tags:
-      - 'v*'  # 当推送tag时触发，如 v1.0.0
+      - 'v*'                # 推送版本标签时触发（如 v1.0.0）
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # 允许手动触发
+    branches: [ main ]      # 创建PR到main分支时触发
+  workflow_dispatch:        # 允许在GitHub Actions页面手动触发
 
 jobs:
+  # Windows构建任务
   build-windows:
+    name: 构建Windows版本
     runs-on: windows-latest
     
     steps:
-    - name: 检出代码
+    # 步骤1: 检出代码
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 安装Qt
+    # 步骤2: 安装Qt开发环境
+    - name: 🔧 安装Qt 6.9.0
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.9.0'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_mingw'
-        cache: true
+        version: '6.9.0'           # Qt版本
+        host: 'windows'            # 主机平台
+        target: 'desktop'          # 目标平台
+        arch: 'win64_mingw'        # 架构：MinGW 64位
+        cache: true                # 启用缓存以加快构建速度
         
-    - name: 配置CMake
+    # 步骤3: 配置CMake项目
+    - name: ⚙️ 配置CMake
       run: |
         mkdir build
         cd build
         cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
         
-    - name: 编译项目
+    # 步骤4: 编译项目
+    - name: 🔨 编译项目
       run: |
         cd build
         cmake --build . --config Release
         
-    - name: 部署Qt依赖
+    # 步骤5: 使用windeployqt部署Qt依赖
+    - name: 📦 部署Qt依赖
       run: |
         cd build
         windeployqt --release StudentSystem.exe
         
-    - name: 创建发布包
+    # 步骤6: 创建发布包
+    - name: 📂 打包发布文件
       run: |
+        # 创建发布目录
         mkdir StudentSystem-Windows
+        
+        # 复制主程序
         Copy-Item -Path "build\StudentSystem.exe" -Destination "StudentSystem-Windows\"
+        
+        # 复制所有DLL文件
         Copy-Item -Path "build\*.dll" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
+        
+        # 复制Qt插件目录
         Copy-Item -Path "build\platforms" -Destination "StudentSystem-Windows\platforms" -Recurse -ErrorAction SilentlyContinue
         Copy-Item -Path "build\styles" -Destination "StudentSystem-Windows\styles" -Recurse -ErrorAction SilentlyContinue
         Copy-Item -Path "build\imageformats" -Destination "StudentSystem-Windows\imageformats" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\iconengines" -Destination "StudentSystem-Windows\iconengines" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\generic" -Destination "StudentSystem-Windows\generic" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\networkinformation" -Destination "StudentSystem-Windows\networkinformation" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\tls" -Destination "StudentSystem-Windows\tls" -Recurse -ErrorAction SilentlyContinue
+        
+        # 复制翻译文件
         Copy-Item -Path "build\translations" -Destination "StudentSystem-Windows\translations" -Recurse -ErrorAction SilentlyContinue
+        
+        # 复制说明文档
         Copy-Item -Path "README.md" -Destination "StudentSystem-Windows\"
+        Copy-Item -Path "DEPLOYMENT.md" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
+        
+        # 压缩成ZIP文件
         Compress-Archive -Path "StudentSystem-Windows\*" -DestinationPath "StudentSystem-Windows.zip"
         
-    - name: 上传构建产物
+    # 步骤7: 上传构建产物到GitHub Actions
+    - name: ⬆️ 上传构建产物
       uses: actions/upload-artifact@v4
       with:
         name: StudentSystem-Windows
         path: StudentSystem-Windows.zip
-        retention-days: 30
+        retention-days: 30          # 保留30天
         
-    - name: 创建Release（仅tag触发）
+    # 步骤8: 创建GitHub Release（仅在推送tag时执行）
+    - name: 🚀 创建GitHub Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         files: StudentSystem-Windows.zip
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-linux:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 安装Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '6.9.0'
-        host: 'linux'
-        target: 'desktop'
-        cache: true
-        
-    - name: 安装依赖
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libxcb-cursor0
-        
-    - name: 配置CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        
-    - name: 编译项目
-      run: |
-        cd build
-        cmake --build . --config Release
-        
-    - name: 创建AppImage（可选）
-      run: |
-        mkdir -p StudentSystem-Linux
-        cp build/StudentSystem StudentSystem-Linux/
-        cp README.md StudentSystem-Linux/
-        tar -czf StudentSystem-Linux.tar.gz StudentSystem-Linux/
-        
-    - name: 上传构建产物
-      uses: actions/upload-artifact@v4
-      with:
-        name: StudentSystem-Linux
-        path: StudentSystem-Linux.tar.gz
-        retention-days: 30
-        
-    - name: 创建Release（仅tag触发）
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: StudentSystem-Linux.tar.gz
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-macos:
-    runs-on: macos-latest
-    
-    steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 安装Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '6.9.0'
-        host: 'mac'
-        target: 'desktop'
-        cache: true
-        
-    - name: 配置CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        
-    - name: 编译项目
-      run: |
-        cd build
-        cmake --build . --config Release
-        
-    - name: 部署Qt依赖
-      run: |
-        cd build
-        macdeployqt StudentSystem.app -dmg
-        
-    - name: 上传构建产物
-      uses: actions/upload-artifact@v4
-      with:
-        name: StudentSystem-macOS
-        path: build/StudentSystem.dmg
-        retention-days: 30
-        
-    - name: 创建Release（仅tag触发）
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: build/StudentSystem.dmg
-        draft: false
-        prerelease: false
+        draft: false                # 不创建草稿
+        prerelease: false           # 不标记为预发布版本
+        generate_release_notes: true # 自动生成发布说明
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

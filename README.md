@@ -1,9 +1,9 @@
 # 学生信息管理系统
 
 [![Build Status](https://github.com/SenyFish/StudentSystem/actions/workflows/build.yml/badge.svg)](https://github.com/SenyFish/StudentSystem/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io/)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/SenyFish/StudentSystem)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://github.com/SenyFish/StudentSystem)
+[![Release](https://img.shields.io/github/v/release/SenyFish/StudentSystem)](https://github.com/SenyFish/StudentSystem/releases)
 
 一个基于Qt 6的C++学生信息管理系统，提供完整的学生信息增删改查功能。
 
@@ -128,6 +128,33 @@ class Student {
 - 2021001 - 张三 - 男 - 20岁 - 计算机科学
 - 2021002 - 李四 - 女 - 19岁 - 软件工程
 - 2021003 - 王五 - 男 - 21岁 - 信息安全
+
+## 自动化构建
+
+本项目配置了GitHub Actions自动化构建流程：
+
+### 🚀 自动构建特性
+- ✅ 每次推送代码自动编译
+- ✅ 自动使用windeployqt打包所有依赖
+- ✅ 生成可直接运行的Windows安装包
+- ✅ 推送版本标签自动创建Release
+
+### 📥 下载构建产物
+1. 访问 [Actions页面](https://github.com/SenyFish/StudentSystem/actions)
+2. 点击最新成功的构建
+3. 下载 `StudentSystem-Windows.zip`
+4. 解压后即可直接运行，无需安装Qt！
+
+### 🏷️ 发布新版本
+```bash
+# 创建版本标签
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# 自动触发构建并创建Release
+```
+
+查看详细说明：[GitHub Actions使用指南](GITHUB_ACTIONS.md)
 
 ## 未来改进计划
 
