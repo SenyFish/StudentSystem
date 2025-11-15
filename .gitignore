@@ -59,3 +59,7 @@ install_manifest.txt
 # Debug/Release
 Debug/
 Release/
+
+# Documentation files (ignore all .md except README.md)
+*.md
+!README.md
