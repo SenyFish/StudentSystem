@@ -7,6 +7,17 @@
 
 一个基于Qt 6的C++学生信息管理系统，提供完整的学生信息增删改查功能。
 
+## 🚀 快速开始
+
+**直接使用**（无需安装Qt）：
+1. 访问 [Releases页面](https://github.com/SenyFish/StudentSystem/releases) 下载最新版本
+2. 下载 `StudentSystem-Windows.zip`（推荐下载"latest"标签）
+3. 解压后双击 `StudentSystem.exe` 即可运行
+
+**详细说明**：查看 [下载指南](DOWNLOAD.md) 了解更多下载方式
+
+**从源码编译**：参见下方的[编译和运行](#编译和运行)章节
+
 ## 功能特性
 
 ### 主要功能
@@ -140,10 +151,18 @@ class Student {
 - ✅ 推送版本标签自动创建Release
 
 ### 📥 下载构建产物
-1. 访问 [Actions页面](https://github.com/SenyFish/StudentSystem/actions)
-2. 点击最新成功的构建
-3. 下载 `StudentSystem-Windows.zip`
-4. 解压后即可直接运行，无需安装Qt！
+
+**推荐方式**：从 [Releases页面](https://github.com/SenyFish/StudentSystem/releases) 下载
+
+1. **最新开发版** - 点击"latest"标签
+   - 每次代码更新自动发布
+   - 包含最新功能和修复
+   
+2. **稳定版本** - 选择v1.0.0等版本号
+   - 经过测试的稳定版本
+   - 推荐日常使用
+
+下载后解压即可直接运行，无需安装Qt！
 
 ### 🏷️ 发布新版本
 ```bash

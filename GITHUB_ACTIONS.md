@@ -51,11 +51,13 @@
 6. 📦 **部署Qt依赖** - 使用windeployqt自动部署所有DLL和插件
 7. 📂 **打包发布文件** - 复制所有必需文件并打包成ZIP
 8. ⬆️ **上传构建产物** - 上传到GitHub Actions（保留30天）
-9. 🚀 **创建Release** - 如果是版本标签，自动创建GitHub Release
+9. 🚀 **自动发布** - 创建"latest"预发布版本（每次推送main分支时）
+10. 🎉 **正式发布** - 创建正式版本（仅推送tag时）
 
 **注意**：
 - 使用MSVC编译器而非MinGW，因为GitHub Actions环境中MSVC更稳定可靠
 - 使用Qt 6.7.3（LTS长期支持版本）而非6.9.0，因为6.7.3对MSVC支持更好且更稳定
+- **每次推送代码**都会自动创建/更新"latest"预发布版本，方便获取最新构建
 
 ## 如何使用
 
@@ -65,33 +67,77 @@
 
 ### 2. 下载构建产物
 
-构建完成后：
+有三种方式获取构建产物：
+
+#### 方式1：从Releases下载（推荐）⭐
+直接访问 [Releases页面](https://github.com/SenyFish/StudentSystem/releases)：
+
+1. **最新开发版 (latest)**
+   - 每次代码更新自动发布
+   - 标记为"Pre-release"
+   - 包含最新功能和修复
+   - 适合想要体验新功能的用户
+
+2. **正式版本 (v1.0.0等)**
+   - 经过测试的稳定版本
+   - 创建tag时才会发布
+   - 推荐生产环境使用
+
+#### 方式2：从Actions下载
 1. 进入 **Actions** 标签
 2. 选择一个成功的工作流运行
-3. 在 **Artifacts** 部分下载：
-   - `StudentSystem-Windows.zip` - Windows完整安装包（包含所有依赖）
+3. 在 **Artifacts** 部分下载 `StudentSystem-Windows.zip`
+4. 注意：Artifacts保留30天
+
+#### 方式3：从Release API下载
+使用命令行直接下载最新版本：
+```bash
+# 使用curl下载最新版本
+curl -L https://github.com/SenyFish/StudentSystem/releases/download/latest/StudentSystem-Windows.zip -o StudentSystem-Windows.zip
+```
 
 **说明**：解压后即可在任何Windows电脑上直接运行，无需安装Qt环境！
 
-### 3. 创建正式发布版本
+### 3. 发布版本说明
 
-当你准备发布新版本时：
+#### 自动发布（预发布版本）
+**每次推送到main分支时自动执行**：
+```bash
+git push origin main
+```
+
+会自动：
+- ✅ 触发构建流程
+- ✅ 创建/更新"latest"标签
+- ✅ 发布预发布版本
+- ✅ 包含构建信息和提交详情
+
+访问 [Releases](https://github.com/SenyFish/StudentSystem/releases) 查看最新的自动构建版本。
+
+#### 创建正式发布版本
+当你准备发布稳定版本时：
 
 ```bash
-# 1. 确保代码已提交
+# 1. 确保代码已提交并测试通过
 git add .
 git commit -m "准备发布v1.0.0版本"
+git push
 
-# 2. 创建并推送tag
+# 2. 创建并推送版本标签
 git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 ```
 
 这将自动：
-- 触发构建流程
-- 创建GitHub Release
-- 上传Windows安装包
-- 生成Release说明
+- ✅ 触发构建流程
+- ✅ 创建正式Release（非预发布）
+- ✅ 上传Windows安装包
+- ✅ 自动生成详细的Release说明
+
+**版本号建议**：
+- 主版本号：v1.0.0, v2.0.0 - 重大更新
+- 次版本号：v1.1.0, v1.2.0 - 新功能
+- 修订号：v1.0.1, v1.0.2 - Bug修复
 
 ## 添加构建状态徽章
 
