@@ -16,6 +16,10 @@ jobs:
     name: 构建Windows版本
     runs-on: windows-latest
     
+    # 设置权限：允许创建和更新Releases
+    permissions:
+      contents: write        # 允许创建Release和上传文件
+      
     steps:
     # 步骤1: 检出代码
     - name: 📥 检出代码
