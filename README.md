@@ -1,5 +1,10 @@
 # 学生信息管理系统
 
+[![Build Status](https://github.com/SenyFish/StudentSystem/actions/workflows/build.yml/badge.svg)](https://github.com/SenyFish/StudentSystem/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Qt](https://img.shields.io/badge/Qt-6.9.0-green.svg)](https://www.qt.io/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/SenyFish/StudentSystem)
+
 一个基于Qt 6的C++学生信息管理系统，提供完整的学生信息增删改查功能。
 
 ## 功能特性

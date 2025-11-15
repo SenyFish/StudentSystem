@@ -1,0 +1,180 @@
+name: Build and Release Qt Application
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'  # 当推送tag时触发，如 v1.0.0
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 安装Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.9.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_mingw'
+        modules: 'qtbase qtwidgets'
+        cache: true
+        
+    - name: 配置CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+        
+    - name: 编译项目
+      run: |
+        cd build
+        cmake --build . --config Release
+        
+    - name: 部署Qt依赖
+      run: |
+        cd build
+        windeployqt --release StudentSystem.exe
+        
+    - name: 创建发布包
+      run: |
+        mkdir StudentSystem-Windows
+        Copy-Item -Path "build\StudentSystem.exe" -Destination "StudentSystem-Windows\"
+        Copy-Item -Path "build\*.dll" -Destination "StudentSystem-Windows\" -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\platforms" -Destination "StudentSystem-Windows\platforms" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\styles" -Destination "StudentSystem-Windows\styles" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\imageformats" -Destination "StudentSystem-Windows\imageformats" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "build\translations" -Destination "StudentSystem-Windows\translations" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "README.md" -Destination "StudentSystem-Windows\"
+        Compress-Archive -Path "StudentSystem-Windows\*" -DestinationPath "StudentSystem-Windows.zip"
+        
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: StudentSystem-Windows
+        path: StudentSystem-Windows.zip
+        retention-days: 30
+        
+    - name: 创建Release（仅tag触发）
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: StudentSystem-Windows.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 安装Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.9.0'
+        host: 'linux'
+        target: 'desktop'
+        modules: 'qtbase qtwidgets'
+        cache: true
+        
+    - name: 安装依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxcb-cursor0
+        
+    - name: 配置CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        
+    - name: 编译项目
+      run: |
+        cd build
+        cmake --build . --config Release
+        
+    - name: 创建AppImage（可选）
+      run: |
+        mkdir -p StudentSystem-Linux
+        cp build/StudentSystem StudentSystem-Linux/
+        cp README.md StudentSystem-Linux/
+        tar -czf StudentSystem-Linux.tar.gz StudentSystem-Linux/
+        
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: StudentSystem-Linux
+        path: StudentSystem-Linux.tar.gz
+        retention-days: 30
+        
+    - name: 创建Release（仅tag触发）
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: StudentSystem-Linux.tar.gz
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 安装Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.9.0'
+        host: 'mac'
+        target: 'desktop'
+        modules: 'qtbase qtwidgets'
+        cache: true
+        
+    - name: 配置CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        
+    - name: 编译项目
+      run: |
+        cd build
+        cmake --build . --config Release
+        
+    - name: 部署Qt依赖
+      run: |
+        cd build
+        macdeployqt StudentSystem.app -dmg
+        
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: StudentSystem-macOS
+        path: build/StudentSystem.dmg
+        retention-days: 30
+        
+    - name: 创建Release（仅tag触发）
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/StudentSystem.dmg
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
