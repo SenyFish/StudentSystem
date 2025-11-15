@@ -1,110 +1,61 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+
 # Qt Creator
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
-*.moc
-moc_*.cpp
-moc_*.h
-qrc_*.cpp
-ui_*.h
-*.qmlc
-*.jsc
-Makefile*
-*build-*
+*.user
+*.user.*
 *.autosave
 
-# Qt Creator local machine specific files for imported projects
-*creator.user*
+# Qt compiled files
+*.qm
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Compiled Object files
+*.o
+*.obj
+
+# Executables
+*.exe
+*.app
+*.out
+
+# Dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Static libraries
+*.a
+*.lib
+
+# IDE files
+.vscode/
+.idea/
+*.pro.user*
+
+# Logs
+logs*/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
 
 # CMake
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles/
-CMakeScripts/
 cmake_install.cmake
 install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
-*.ninja
-.ninja_deps
-.ninja_log
-build.ninja
-rules.ninja
 
-# Build directories
-build/
-build-*/
-debug/
-release/
+# Debug/Release
 Debug/
 Release/
-out/
-
-# Qt generated files
-moc_*.cpp
-*.moc
-qrc_*.cpp
-ui_*.h
-*.autosave
-
-# C++ objects and libs
-*.slo
-*.lo
-*.o
-*.a
-*.la
-*.lai
-*.so
-*.so.*
-*.dll
-*.dylib
-
-# Qt-es
-object_script.*.Release
-object_script.*.Debug
-*_plugin_import.cpp
-/.qmake.cache
-/.qmake.stash
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
-*.moc
-moc_*.cpp
-ui_*.h
-*.autosave
-
-# Executables
-*.exe
-*.out
-*.app
-*.x86_64
-*.hex
-
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-*~
-
-# IDE specific
-.vscode/
-.idea/
-*.swp
-*.swo
-*.kate-swp
-*~
-
-# Testing
-Testing/
-CHANGELOG.md
-DEPLOYMENT.md
-DOWNLOAD.md
-GITHUB_ACTIONS.md
-QUICK_START.md

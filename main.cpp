@@ -3,12 +3,16 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QIcon>
 
 int main(int argc, char *argv[])
 {
     qDebug() << "程序启动";
     
     QApplication a(argc, argv);
+    
+    // 设置应用程序图标
+    a.setWindowIcon(QIcon(":/icon.png"));
     
     qDebug() << "QApplication 创建成功";
     

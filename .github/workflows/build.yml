@@ -24,6 +24,8 @@ jobs:
     # 步骤1: 检出代码
     - name: 📥 检出代码
       uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'  # 自动初始化和更新子模块
       
     # 步骤2: 设置MSVC编译环境
     - name: 🔧 设置MSVC

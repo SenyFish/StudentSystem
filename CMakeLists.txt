@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
         student.cpp
         student.h
         cardwidget.h
+        resources.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -30,6 +31,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
+    # Windows 平台添加应用程序图标
+    if(WIN32)
+        target_sources(StudentSystem PRIVATE app_icon.rc)
+    endif()
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET StudentSystem APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
@@ -39,6 +44,10 @@ else()
         add_library(StudentSystem SHARED
             ${PROJECT_SOURCES}
         )
+    # Windows 平台添加应用程序图标
+    if(WIN32)
+        target_sources(StudentSystem PRIVATE app_icon.rc)
+    endif()
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()

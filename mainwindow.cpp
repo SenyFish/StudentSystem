@@ -11,6 +11,7 @@
 #include <QGridLayout>
 #include <QHeaderView>
 #include <QDebug>
+#include <QIcon>
 #include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     
     // ===== 配置 ElaWindow =====
     setWindowTitle("学生信息管理系统");
+    setWindowIcon(QIcon(":/icon.png"));  // 设置窗口图标
     resize(1400, 800);
     
     // 设置用户信息卡（可选，如果不需要可以隐藏）
