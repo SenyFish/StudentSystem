@@ -125,14 +125,37 @@ git push origin v1.0.0
 
 ### 添加更多Qt模块
 
-如果需要额外的Qt模块（如QtNetwork、QtSql等）：
+**注意**：Qt 6的基础组件（QtCore、QtGui、QtWidgets等）是默认安装的，**不需要**在modules中指定。
+
+如果需要额外的Qt模块（如QtCharts、QtMultimedia等），只需添加**非默认**模块：
 
 ```yaml
 - name: 安装Qt
   uses: jurplel/install-qt-action@v4
   with:
     version: '6.9.0'
-    modules: 'qtbase qtwidgets qtnetwork qtsql'  # 添加需要的模块
+    modules: 'qtcharts qtmultimedia qtnetworkauth'  # 只添加额外需要的模块
+    cache: true
+```
+
+**常见的额外模块**：
+- `qtcharts` - 图表组件
+- `qtdatavisualization` - 数据可视化
+- `qtmultimedia` - 多媒体功能
+- `qtnetworkauth` - 网络认证
+- `qtpositioning` - 定位服务
+- `qtwebsockets` - WebSocket支持
+
+**查看可用模块**：
+```bash
+# Linux
+aqt list-qt linux desktop --modules 6.9.0 gcc_64
+
+# Windows
+aqt list-qt windows desktop --modules 6.9.0 win64_mingw
+
+# macOS
+aqt list-qt mac desktop --modules 6.9.0 clang_64
 ```
 
 ### 修改触发条件
@@ -188,19 +211,26 @@ act push
 
 ## 常见问题
 
-### Q1: 构建失败，提示找不到Qt
+### Q1: 构建失败，提示找不到Qt模块 (qtbase, qtwidgets)
+**A**: Qt 6的基础组件（QtCore、QtGui、QtWidgets）是默认安装的，**不要**在`modules`参数中指定它们。如果看到类似错误：
+```
+ERROR: The packages ['qtbase', 'qtwidgets'] were not found
+```
+请从配置中移除`modules`参数，或者只添加真正需要的额外模块（如qtcharts、qtmultimedia）。
+
+### Q2: 构建失败，提示找不到Qt版本
 **A**: 检查Qt版本是否正确，某些版本可能不可用。访问 [install-qt-action](https://github.com/jurplel/install-qt-action) 查看支持的版本。
 
-### Q2: Windows构建失败，提示CMake错误
+### Q3: Windows构建失败，提示CMake错误
 **A**: 确保CMakeLists.txt正确配置了MinGW编译器。
 
-### Q3: Release未自动创建
+### Q4: Release未自动创建
 **A**: 确保推送了tag，且tag名称以'v'开头（如v1.0.0）。检查GITHUB_TOKEN权限。
 
-### Q4: 想要禁用某个平台的构建
+### Q5: 想要禁用某个平台的构建
 **A**: 在build.yml中注释掉或删除对应的job即可。
 
-### Q5: 构建产物保留时间
+### Q6: 构建产物保留时间
 **A**: 默认保留30天，可修改 `retention-days` 参数。
 
 ## 进阶配置
