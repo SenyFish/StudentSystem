@@ -44,13 +44,16 @@
 
 #### Windows自动构建流程
 1. 📥 **检出代码** - 从GitHub仓库获取最新代码
-2. 🔧 **安装Qt 6.9.0** - 自动安装Qt开发环境（MinGW 64位）
-3. ⚙️ **配置CMake** - 使用MinGW Makefiles生成构建文件
-4. 🔨 **编译项目** - 编译Release版本
-5. 📦 **部署Qt依赖** - 使用windeployqt自动部署所有DLL和插件
-6. 📂 **打包发布文件** - 复制所有必需文件并打包成ZIP
-7. ⬆️ **上传构建产物** - 上传到GitHub Actions（保留30天）
-8. 🚀 **创建Release** - 如果是版本标签，自动创建GitHub Release
+2. 🔧 **设置MSVC** - 配置Microsoft Visual C++编译环境
+3. 🔧 **安装Qt 6.9.0** - 自动安装Qt开发环境（MSVC 2019 64位版本）
+4. ⚙️ **配置CMake** - 使用CMake配置项目
+5. 🔨 **编译项目** - 编译Release版本
+6. 📦 **部署Qt依赖** - 使用windeployqt自动部署所有DLL和插件
+7. 📂 **打包发布文件** - 复制所有必需文件并打包成ZIP
+8. ⬆️ **上传构建产物** - 上传到GitHub Actions（保留30天）
+9. 🚀 **创建Release** - 如果是版本标签，自动创建GitHub Release
+
+**注意**：使用MSVC编译器而非MinGW，因为GitHub Actions环境中MSVC更稳定可靠。
 
 ## 如何使用
 
