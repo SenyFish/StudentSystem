@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     
     // 设置应用程序图标
-    a.setWindowIcon(QIcon(":/icon.png"));
+    a.setWindowIcon(QIcon(":/icon.ico"));
     
     qDebug() << "QApplication 创建成功";
     

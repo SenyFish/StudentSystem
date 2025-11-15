@@ -30,24 +30,14 @@
 2. 替换项目根目录的 `icon.png` 文件
 3. 重新编译项目
 
-### 方法 2：使用 .ico 格式（Windows .exe 文件图标必须）
-
-⚠️ **重要**: Windows 资源编译器 (windres.exe) **不支持 PNG 格式**，必须使用 ICO 格式！
-
-**步骤**：
-1. 将 PNG 转换为 ICO 格式（可使用下面的工具）
-2. 将转换后的文件保存为 `icon.ico`
+### 方法 2：使用 .ico 格式（推荐用于 Windows）
+1. 将 PNG 转换为 ICO 格式（可使用在线工具）
+2. 将 `icon.png` 转换为 `icon.ico`
 3. 修改 `app_icon.rc` 文件：
    ```rc
    IDI_ICON1 ICON "icon.ico"
    ```
-4. 在 `CMakeLists.txt` 中取消注释 Windows 资源配置：
-   ```cmake
-   if(WIN32)
-       target_sources(StudentSystem PRIVATE app_icon.rc)
-   endif()
-   ```
-5. 重新编译项目
+4. 重新编译项目
 
 ## 📐 图标尺寸建议
 
@@ -93,22 +83,14 @@ ffmpeg -i icon.png icon.ico
 - 检查资源路径是否正确（`:/icon.png`）
 - 清理并重新编译项目
 
-### 问题 2：编译错误 "icon file does not contain icon data"
-**原因**：Windows 资源编译器 (windres.exe) 不支持 PNG 格式
-
-**解决方案**：
-- 必须使用 .ico 格式的图标文件
-- 使用在线工具将 PNG 转换为 ICO（推荐 https://www.icoconverter.com/）
-- 或者暂时禁用 Windows 资源文件（窗口图标仍然可用）
-
-### 问题 3：.exe 文件没有图标
+### 问题 2：.exe 文件没有图标
 **解决方案**：
 - 确认 `app_icon.rc` 文件存在
-- 确认使用的是 `.ico` 格式而不是 `.png`
-- 确认 CMakeLists.txt 中已取消注释资源配置
+- 确认 CMakeLists.txt 中已添加资源配置
+- 使用 .ico 格式而不是 .png
 - 清理并重新编译 Release 版本
 
-### 问题 4：图标模糊或失真
+### 问题 3：图标模糊或失真
 **解决方案**：
 - 使用更高分辨率的原始图标（至少 256x256）
 - 使用 .ico 格式，包含多个尺寸
