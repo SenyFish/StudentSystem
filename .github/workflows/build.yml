@@ -148,7 +148,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
-        name: 学生信息管理系统 ${{ steps.version.outputs.new_version }}
+        name: ${{ steps.version.outputs.new_version }}
         tag_name: ${{ steps.version.outputs.new_version }}
         files: StudentSystem-Windows.zip
         draft: false               # 不创建草稿

@@ -10,13 +10,8 @@
 ## 🚀 快速开始
 
 **直接使用**（无需安装Qt）：
-1. 访问 [Releases页面](https://github.com/SenyFish/StudentSystem/releases) 下载最新版本
-2. 下载 `StudentSystem-Windows.zip`（推荐下载"latest"标签）
-3. 解压后双击 `StudentSystem.exe` 即可运行
-
-**详细说明**：查看 [下载指南](DOWNLOAD.md) 了解更多下载方式
-
-**从源码编译**：参见下方的[编译和运行](#编译和运行)章节
+1. 下载 `StudentSystem-Windows.zip`（推荐下载"latest"标签）
+2. 解压后双击 `StudentSystem.exe` 即可运行
 
 ## 功能特性
 
@@ -56,44 +51,6 @@ StudentSystem/
 └── README.md             # 项目说明文档
 ```
 
-## 编译和运行
-
-### 前置条件
-- Qt 6.x
-- CMake 3.16或更高版本
-- C++17兼容的编译器（MinGW/MSVC/GCC/Clang）
-
-### 构建步骤
-
-1. **创建构建目录**
-```bash
-mkdir build
-cd build
-```
-
-2. **配置项目**
-```bash
-cmake ..
-```
-
-3. **编译项目**
-```bash
-cmake --build .
-```
-
-4. **运行程序**
-```bash
-./StudentSystem.exe  # Windows
-./StudentSystem      # Linux/macOS
-```
-
-### 使用Qt Creator
-1. 打开Qt Creator
-2. 选择"文件" > "打开文件或项目"
-3. 选择`CMakeLists.txt`文件
-4. 配置项目（选择合适的Kit）
-5. 点击"运行"按钮
-
 ## 使用说明
 
 ### 添加学生
@@ -120,69 +77,12 @@ cmake --build .
 ### 清空输入
 - 点击"清空输入"按钮可清空所有输入框
 
-## 数据模型
-
-### Student类
-```cpp
-class Student {
-    QString id;       // 学号
-    QString name;     // 姓名
-    QString gender;   // 性别
-    int age;          // 年龄
-    QString major;    // 专业
-};
-```
-
 ## 示例数据
 
 程序启动时会自动加载以下示例数据：
 - 2021001 - 张三 - 男 - 20岁 - 计算机科学
 - 2021002 - 李四 - 女 - 19岁 - 软件工程
 - 2021003 - 王五 - 男 - 21岁 - 信息安全
-
-## 自动化构建
-
-本项目配置了GitHub Actions自动化构建流程：
-
-### 🚀 自动构建特性
-- ✅ 每次推送代码自动编译
-- ✅ 自动使用windeployqt打包所有依赖
-- ✅ 生成可直接运行的Windows安装包
-- ✅ 推送版本标签自动创建Release
-
-### 📥 下载构建产物
-
-**推荐方式**：从 [Releases页面](https://github.com/SenyFish/StudentSystem/releases) 下载
-
-1. **最新开发版** - 点击"latest"标签
-   - 每次代码更新自动发布
-   - 包含最新功能和修复
-   
-2. **稳定版本** - 选择v1.0.0等版本号
-   - 经过测试的稳定版本
-   - 推荐日常使用
-
-下载后解压即可直接运行，无需安装Qt！
-
-### 🏷️ 发布新版本
-```bash
-# 创建版本标签
-git tag -a v1.0.0 -m "Release version 1.0.0"
-git push origin v1.0.0
-
-# 自动触发构建并创建Release
-```
-
-查看详细说明：[GitHub Actions使用指南](GITHUB_ACTIONS.md)
-
-## 未来改进计划
-
-- [ ] 数据持久化（保存到文件或数据库）
-- [ ] 导入/导出功能（CSV/Excel）
-- [ ] 数据统计和报表
-- [ ] 更多的搜索过滤条件
-- [ ] 学生成绩管理
-- [ ] 用户权限管理
 
 ## 开发者
 
