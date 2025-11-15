@@ -113,77 +113,64 @@ jobs:
         path: StudentSystem-Windows.zip
         retention-days: 30          # 保留30天
         
-    # 步骤9: 自动发布最新版本（每次推送main分支时）
-    - name: 🚀 发布最新开发版本
+    # 步骤9: 获取最新版本号并自动递增
+    - name: 🔢 自动计算新版本号
       if: github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v1
-      with:
-        name: 最新开发版 (自动构建)
-        tag_name: latest           # 使用"latest"标签
-        files: StudentSystem-Windows.zip
-        draft: false               # 不创建草稿
-        prerelease: true           # 标记为预发布版本
-        body: |
-          ## 🚀 自动构建版本 - Fluent-UI 现代化界面
-          
-          ✨ **新特性**：现已集成 ElaWidgetTools Fluent-UI 组件库！
-          
-          这是最新的自动构建版本，每次代码更新都会自动发布。
-          
-          **✨ UI升级亮点**：
-          - 🎨 全新 Microsoft Fluent Design 风格
-          - 🌫️ Windows 11 Acrylic 亚克力模糊效果
-          - 📦 3D 卡片设计，精致阴影和圆角
-          - ✨ 流畅的动画和过渡效果
-          - 💬 现代化非侵入式消息提示
-          - 🖼️ 无边框现代化窗口
-          - 🎭 支持亮色/暗色主题切换
-          
-          **构建信息**：
-          - 📅 构建时间：${{ github.event.head_commit.timestamp }}
-          - 🔨 提交信息：${{ github.event.head_commit.message }}
-          - 👤 提交者：${{ github.event.head_commit.author.name }}
-          - 🔗 提交SHA：${{ github.sha }}
-          - 🎨 UI框架：ElaWidgetTools (Fluent-UI)
-          - 🛠️ Qt版本：6.6.3
-          
-          **下载说明**：
-          1. 下载 `StudentSystem-Windows.zip`
-          2. 解压到任意目录
-          3. 双击 `StudentSystem.exe` 运行
-          4. 查看 `ELAWIDGETTOOLS_INTEGRATION.md` 了解新界面特性
-          
-          **系统要求**：
-          - Windows 10/11 (64位)
-          - 推荐 Windows 11 以获得完整亚克力效果
-          - 无需安装Qt环境
-          - 无需额外依赖
-          
-          **注意**：这是开发版本，可能包含未经充分测试的新功能。
-          如需稳定版本，请下载正式发布的版本（v1.0.0等）。
-          
-          ---
-          
-          📖 [使用文档](https://github.com/SenyFish/StudentSystem/blob/main/README.md) | 
-          🎨 [UI集成说明](https://github.com/SenyFish/StudentSystem/blob/main/ELAWIDGETTOOLS_INTEGRATION.md) | 
+      id: version
+      run: |
+        # 获取最新的release版本号
+        $latestRelease = gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>$null
+        
+        if ($latestRelease) {
+          Write-Host "📌 当前最新版本: $latestRelease"
+          # 提取版本号（假设格式为 v1.0）
+          if ($latestRelease -match 'v(\d+)\.(\d+)') {
+            $major = [int]$matches[1]
+            $minor = [int]$matches[2]
+            # 递增主版本号
+            $newMajor = $major + 1
+            $newVersion = "v$newMajor.0"
+          } else {
+            $newVersion = "v1.0"
+          }
+        } else {
+          Write-Host "📌 这是第一个版本"
+          $newVersion = "v1.0"
+        }
+        
+        Write-Host "🎯 新版本号: $newVersion"
+        echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    # 步骤10: 自动创建并推送版本标签
+    - name: 🏷️ 创建版本标签
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a ${{ steps.version.outputs.new_version }} -m "Auto-release ${{ steps.version.outputs.new_version }}"
+        git push origin ${{ steps.version.outputs.new_version }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    # 步骤10: 创建正式发布版本（仅在推送tag时执行）
+    # 步骤11: 创建正式发布版本（每次构建成功后自动发布）
     - name: 🎉 发布正式版本
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
+        name: 学生信息管理系统 ${{ steps.version.outputs.new_version }}
+        tag_name: ${{ steps.version.outputs.new_version }}
         files: StudentSystem-Windows.zip
-        draft: false                # 不创建草稿
-        prerelease: false           # 不标记为预发布版本
+        draft: false               # 不创建草稿
+        prerelease: false          # 正式版本
         generate_release_notes: true # 自动生成发布说明
         body: |
-          ## 🎉 正式发布版本 - Fluent-UI 现代化界面
+          ## 🎉 学生信息管理系统 ${{ steps.version.outputs.new_version }} - Fluent-UI 现代化界面
           
           ✨ **全新界面**：采用 Microsoft Fluent Design 设计语言！
           
-          这是经过测试的稳定版本，推荐生产环境使用。
+          本版本已通过自动化构建测试，可放心使用。
           
           **✨ 主要特性**：
           - 🎨 现代化 Fluent-UI 风格界面
@@ -194,6 +181,15 @@ jobs:
           - ✨ 流畅的动画效果
           - 💬 友好的用户提示
           - 🎭 支持主题切换
+          
+          **构建信息**：
+          - 📦 版本号：${{ steps.version.outputs.new_version }}
+          - 📅 构建时间：${{ github.event.head_commit.timestamp }}
+          - 🔨 提交信息：${{ github.event.head_commit.message }}
+          - 👤 提交者：${{ github.event.head_commit.author.name }}
+          - 🔗 提交SHA：${{ github.sha }}
+          - 🎨 UI框架：ElaWidgetTools (Fluent-UI)
+          - 🛠️ Qt版本：6.6.3
           
           **下载说明**：
           1. 下载下方的 `StudentSystem-Windows.zip`
@@ -216,6 +212,7 @@ jobs:
           
           📖 [完整文档](https://github.com/SenyFish/StudentSystem) | 
           🎨 [UI集成说明](https://github.com/SenyFish/StudentSystem/blob/main/ELAWIDGETTOOLS_INTEGRATION.md) | 
+          📝 [更新日志](https://github.com/SenyFish/StudentSystem/blob/main/CHANGELOG.md)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
