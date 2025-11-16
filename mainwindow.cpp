@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "flatcardwidget.h"
 #include "ElaScrollPage.h"
 #include "ElaScrollPageArea.h"
 #include "ElaText.h"
@@ -12,6 +13,8 @@
 #include <QHeaderView>
 #include <QDebug>
 #include <QIcon>
+#include <QTimer>
+#include <QGraphicsDropShadowEffect>
 #include <algorithm>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -49,12 +52,17 @@ MainWindow::MainWindow(QWidget *parent)
     students.append(Student("2021005", "钱七", "男", 22, "人工智能"));
     updateTable();
     
-    qDebug() << "显示欢迎消息";
-    // 显示欢迎消息
-    ElaMessageBar::success(ElaMessageBarType::TopRight, "欢迎", 
-                          QString("系统已加载 %1 条学生记录").arg(students.size()), 3000, this);
+    // 强制立即计算和应用布局，确保窗口在显示前完全准备好
+    adjustSize();
+    updateGeometry();
     
     qDebug() << "MainWindow 构造函数完成";
+    
+    // 延迟显示欢迎消息，避免在窗口初始化时显示
+    QTimer::singleShot(800, this, [this]() {
+        ElaMessageBar::success(ElaMessageBarType::TopRight, "欢迎", 
+                              QString("系统已加载 %1 条学生记录").arg(students.size()), 3000, this);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -66,27 +74,57 @@ void MainWindow::initUI()
 {
     // 创建主布局容器
     QWidget* centralWidget = new QWidget(this);
+    
+    // 根据主题设置背景色
+    auto updateBackground = [centralWidget]() {
+        ElaThemeType::ThemeMode themeMode = ElaTheme::getInstance()->getThemeMode();
+        QString bgColor = (themeMode == ElaThemeType::Light) ? "#f5f7fa" : "#1a1a1a";
+        centralWidget->setStyleSheet(QString("background-color: %1;").arg(bgColor));
+    };
+    
+    // 初始设置背景
+    updateBackground();
+    
+    // 监听主题变化
+    connect(ElaTheme::getInstance(), &ElaTheme::themeModeChanged, centralWidget, updateBackground);
+    
     QHBoxLayout* mainLayout = new QHBoxLayout(centralWidget);
-    mainLayout->setSpacing(20);
-    mainLayout->setContentsMargins(20, 20, 20, 20);
+    mainLayout->setSpacing(16);
+    mainLayout->setContentsMargins(16, 16, 16, 16);
     
     // ===== 左侧：输入表单区域 =====
-    // 创建卡片容器
-    CardWidget* leftCard = new CardWidget(this);
+    // 创建扁平卡片容器
+    FlatCardWidget* leftCard = new FlatCardWidget(this);
     leftCard->setMaximumWidth(420);
-    leftCard->setBorderRadius(15);
+    leftCard->setElevation(1);
     
     QWidget* leftWidget = new QWidget(leftCard);
     QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
-    leftLayout->setSpacing(12);
-    leftLayout->setContentsMargins(25, 25, 25, 25);
+    leftLayout->setSpacing(16);
+    leftLayout->setContentsMargins(30, 30, 30, 30);
     
-    // 标题
+    // 标题 - 添加渐变效果
     ElaText* titleText = new ElaText("学生信息录入", this);
-    titleText->setTextPixelSize(24);
+    titleText->setTextPixelSize(22);
+    titleText->setStyleSheet(R"(
+        ElaText {
+            color: #667eea;
+            font-weight: bold;
+            padding-bottom: 10px;
+        }
+    )");
     leftLayout->addWidget(titleText);
     
-    leftLayout->addSpacing(10);
+    // 添加分隔线
+    QWidget* separatorLine = new QWidget(this);
+    separatorLine->setFixedHeight(2);
+    separatorLine->setStyleSheet(R"(
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                   stop:0 #667eea, stop:1 transparent);
+    )");
+    leftLayout->addWidget(separatorLine);
+    
+    leftLayout->addSpacing(15);
     
     // 学号输入
     ElaText* labelId = new ElaText("学号", this);
@@ -139,25 +177,97 @@ void MainWindow::initUI()
     
     leftLayout->addSpacing(20);
     
-    // 操作按钮 - 使用更现代的设计
+    // 操作按钮 - 使用渐变色和阴影效果
     btnAdd = new ElaPushButton("添加学生", this);
     btnAdd->setFixedHeight(45);
-    btnAdd->setStyleSheet("font-size: 14px; font-weight: bold;");
+    btnAdd->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #667eea, stop:1 #764ba2);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #7a8df5, stop:1 #8a5bb8);
+        }
+    )");
+    QGraphicsDropShadowEffect *addShadow = new QGraphicsDropShadowEffect(btnAdd);
+    addShadow->setBlurRadius(20);
+    addShadow->setColor(QColor(102, 126, 234, 100));
+    addShadow->setOffset(0, 4);
+    btnAdd->setGraphicsEffect(addShadow);
     connect(btnAdd, &ElaPushButton::clicked, this, &MainWindow::onAddStudent);
     
     btnModify = new ElaPushButton("修改学生", this);
     btnModify->setFixedHeight(45);
-    btnModify->setStyleSheet("font-size: 14px;");
+    btnModify->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #43e97b, stop:1 #38f9d7);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #55f58d, stop:1 #4affea);
+        }
+    )");
+    QGraphicsDropShadowEffect *modifyShadow = new QGraphicsDropShadowEffect(btnModify);
+    modifyShadow->setBlurRadius(20);
+    modifyShadow->setColor(QColor(67, 233, 123, 100));
+    modifyShadow->setOffset(0, 4);
+    btnModify->setGraphicsEffect(modifyShadow);
     connect(btnModify, &ElaPushButton::clicked, this, &MainWindow::onModifyStudent);
     
     btnDelete = new ElaPushButton("删除学生", this);
     btnDelete->setFixedHeight(45);
-    btnDelete->setStyleSheet("font-size: 14px;");
+    btnDelete->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #f093fb, stop:1 #f5576c);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #ffa4ff, stop:1 #ff6a7f);
+        }
+    )");
+    QGraphicsDropShadowEffect *deleteShadow = new QGraphicsDropShadowEffect(btnDelete);
+    deleteShadow->setBlurRadius(20);
+    deleteShadow->setColor(QColor(240, 147, 251, 100));
+    deleteShadow->setOffset(0, 4);
+    btnDelete->setGraphicsEffect(deleteShadow);
     connect(btnDelete, &ElaPushButton::clicked, this, &MainWindow::onDeleteStudent);
     
     btnClear = new ElaPushButton("清空输入", this);
     btnClear->setFixedHeight(45);
-    btnClear->setStyleSheet("font-size: 14px;");
+    btnClear->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #a8b8d8, stop:1 #b8c8e8);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #b8c8e8, stop:1 #c8d8f8);
+        }
+    )");
+    QGraphicsDropShadowEffect *clearShadow = new QGraphicsDropShadowEffect(btnClear);
+    clearShadow->setBlurRadius(20);
+    clearShadow->setColor(QColor(168, 184, 216, 100));
+    clearShadow->setOffset(0, 4);
+    btnClear->setGraphicsEffect(clearShadow);
     connect(btnClear, &ElaPushButton::clicked, this, &MainWindow::onClearInput);
     
     leftLayout->addWidget(btnAdd);
@@ -172,20 +282,26 @@ void MainWindow::initUI()
     leftCardLayout->addWidget(leftWidget);
     
     // ===== 右侧：表格显示区域 =====
-    // 创建卡片容器
-    CardWidget* rightCard = new CardWidget(this);
-    rightCard->setBorderRadius(15);
+    // 创建扁平卡片容器
+    FlatCardWidget* rightCard = new FlatCardWidget(this);
+    rightCard->setElevation(1);
     
     QWidget* rightWidget = new QWidget(rightCard);
     QVBoxLayout* rightLayout = new QVBoxLayout(rightWidget);
-    rightLayout->setSpacing(15);
-    rightLayout->setContentsMargins(25, 25, 25, 25);
+    rightLayout->setSpacing(20);
+    rightLayout->setContentsMargins(30, 30, 30, 30);
     
     // 标题和搜索栏
     QHBoxLayout* topLayout = new QHBoxLayout();
     
     ElaText* tableTitle = new ElaText("学生信息列表", this);
-    tableTitle->setTextPixelSize(24);
+    tableTitle->setTextPixelSize(22);
+    tableTitle->setStyleSheet(R"(
+        ElaText {
+            color: #667eea;
+            font-weight: bold;
+        }
+    )");
     
     lineEditSearch = new ElaLineEdit(this);
     lineEditSearch->setPlaceholderText("搜索学号或姓名...");
@@ -195,14 +311,71 @@ void MainWindow::initUI()
     
     btnSearch = new ElaPushButton("搜索", this);
     btnSearch->setFixedSize(95, 38);
+    btnSearch->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #4facfe, stop:1 #00f2fe);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #5fbdff, stop:1 #20ffff);
+        }
+    )");
+    QGraphicsDropShadowEffect *searchShadow = new QGraphicsDropShadowEffect(btnSearch);
+    searchShadow->setBlurRadius(15);
+    searchShadow->setColor(QColor(79, 172, 254, 100));
+    searchShadow->setOffset(0, 3);
+    btnSearch->setGraphicsEffect(searchShadow);
     connect(btnSearch, &ElaPushButton::clicked, this, &MainWindow::onSearchStudent);
     
     btnRefresh = new ElaPushButton("刷新", this);
     btnRefresh->setFixedSize(95, 38);
+    btnRefresh->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #fa709a, stop:1 #fee140);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #ff82ac, stop:1 #fff160);
+        }
+    )");
+    QGraphicsDropShadowEffect *refreshShadow = new QGraphicsDropShadowEffect(btnRefresh);
+    refreshShadow->setBlurRadius(15);
+    refreshShadow->setColor(QColor(250, 112, 154, 100));
+    refreshShadow->setOffset(0, 3);
+    btnRefresh->setGraphicsEffect(refreshShadow);
     connect(btnRefresh, &ElaPushButton::clicked, this, &MainWindow::onRefreshTable);
     
     btnSort = new ElaPushButton("排序", this);
     btnSort->setFixedSize(95, 38);
+    btnSort->setStyleSheet(R"(
+        ElaPushButton {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #667eea, stop:1 #764ba2);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        ElaPushButton:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                       stop:0 #7a8df5, stop:1 #8a5bb8);
+        }
+    )");
+    QGraphicsDropShadowEffect *sortShadow = new QGraphicsDropShadowEffect(btnSort);
+    sortShadow->setBlurRadius(15);
+    sortShadow->setColor(QColor(102, 126, 234, 100));
+    sortShadow->setOffset(0, 3);
+    btnSort->setGraphicsEffect(sortShadow);
     connect(btnSort, &ElaPushButton::clicked, this, &MainWindow::onSortById);
     
     topLayout->addWidget(tableTitle);
@@ -223,9 +396,9 @@ void MainWindow::initUI()
     rightCardLayout->setContentsMargins(0, 0, 0, 0);
     rightCardLayout->addWidget(rightWidget);
     
-    // 将左右卡片添加到主布局
-    mainLayout->addWidget(leftCard, 2);
-    mainLayout->addWidget(rightCard, 5);
+    // 将左右卡片添加到主布局 - 扁平化堆叠
+    mainLayout->addWidget(leftCard, 3);
+    mainLayout->addWidget(rightCard, 7);
     
     qDebug() << "centralWidget 大小:" << centralWidget->size();
     qDebug() << "准备添加页面到窗口";

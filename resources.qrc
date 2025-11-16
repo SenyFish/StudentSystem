@@ -3,5 +3,11 @@
     <qresource>
         <file>icon.ico</file>
     </qresource>
+    <qresource prefix="/login">
+        <file>login_assets/img1.png</file>
+        <file>login_assets/img2.png</file>
+        <file>login_assets/QQ.png</file>
+        <file>login_assets/WeChat.png</file>
+    </qresource>
 </RCC>
 

@@ -23,6 +23,10 @@ set(PROJECT_SOURCES
         student.cpp
         student.h
         cardwidget.h
+        flatcardwidget.cpp
+        flatcardwidget.h
+        loginwindow.cpp
+        loginwindow.h
         resources.qrc
 )
 

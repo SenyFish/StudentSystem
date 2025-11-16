@@ -15,12 +15,11 @@ public:
         , m_borderRadius(12)
         , m_shadowEnabled(true)
     {
-        // 启用鼠标跟踪以实现悬停效果
-        setMouseTracking(true);
-        setAttribute(Qt::WA_TranslucentBackground);
-        
         // 设置边距以容纳阴影
         setContentsMargins(15, 15, 15, 15);
+        
+        // 不设置 WA_TranslucentBackground，避免鼠标事件问题
+        setAutoFillBackground(false);
     }
 
     void setBorderRadius(int radius)
@@ -49,21 +48,36 @@ protected:
         // 计算实际绘制区域（考虑阴影边距）
         QRectF cardRect = rect().adjusted(10, 10, -10, -10);
         
-        // 绘制阴影效果
+        // 绘制增强的阴影效果
         if (m_shadowEnabled)
         {
-            for (int i = 0; i < 5; i++)
+            // 外层阴影 - 更柔和、更大范围
+            for (int i = 0; i < 8; i++)
             {
                 QPainterPath shadowPath;
-                QRectF shadowRect = cardRect.adjusted(-i*1.5, -i*1.5, i*1.5, i*1.5);
+                QRectF shadowRect = cardRect.adjusted(-i*2.0, -i*1.5 + i*0.5, i*2.0, i*1.5 + i*0.5);
                 shadowPath.addRoundedRect(shadowRect, m_borderRadius + i, m_borderRadius + i);
                 
-                QColor shadowColor = (themeMode == ElaThemeType::Light) 
-                    ? QColor(0, 0, 0, 15 - i*3) 
-                    : QColor(0, 0, 0, 25 - i*5);
+                QColor shadowColor;
+                if (themeMode == ElaThemeType::Light) {
+                    // 亮色模式：柔和的蓝紫色阴影
+                    shadowColor = QColor(102, 126, 234, 25 - i*3);
+                } else {
+                    // 暗色模式：深色阴影
+                    shadowColor = QColor(0, 0, 0, 40 - i*5);
+                }
                 
                 painter.fillPath(shadowPath, shadowColor);
             }
+            
+            // 内层高光 - 增加立体感
+            QPainterPath highlightPath;
+            QRectF highlightRect = cardRect.adjusted(1, 1, -1, -1);
+            highlightPath.addRoundedRect(highlightRect, m_borderRadius - 1, m_borderRadius - 1);
+            QColor highlightColor = (themeMode == ElaThemeType::Light) 
+                ? QColor(255, 255, 255, 80) 
+                : QColor(255, 255, 255, 15);
+            painter.fillPath(highlightPath, highlightColor);
         }
         
         // 绘制卡片背景
@@ -79,12 +93,6 @@ protected:
         else
         {
             cardColor = QColor(45, 45, 45, 250);
-        }
-        
-        // 悬停效果
-        if (underMouse())
-        {
-            cardColor = cardColor.lighter(105);
         }
         
         painter.fillPath(cardPath, cardColor);
