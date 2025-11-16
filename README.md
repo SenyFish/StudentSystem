@@ -10,7 +10,7 @@
 ## 🚀 快速开始
 
 **直接使用**（无需安装Qt）：
-1. 下载 `StudentSystem-Windows.zip`（推荐下载"latest"标签）
+1. 下载 `StudentSystem-Windows.zip`
 2. 解压后双击 `StudentSystem.exe` 即可运行
 
 ## 功能特性

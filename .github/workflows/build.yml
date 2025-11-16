@@ -62,7 +62,7 @@ jobs:
         cd build\Release
         windeployqt StudentSystem.exe
         
-        # 复制 ElaWidgetTools 库文件
+        # 复制 ElaWidgetTools 库文件  
         echo "正在复制 ElaWidgetTools 库文件..."
         if (Test-Path "..\ElaWidgetTools\ElaWidgetTools\ElaWidgetTools.dll") {
           Copy-Item -Path "..\ElaWidgetTools\ElaWidgetTools\ElaWidgetTools.dll" -Destination "." -Force
@@ -197,8 +197,6 @@ jobs:
           - C++17
           
           ---
-          
-          📖 [完整文档](https://github.com/SenyFish/StudentSystem)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
