@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/NotoSansSC-Bold.ttf</file>
+        <file>fonts/NotoSansSC-Medium.ttf</file>
+        <file>fonts/NotoSansSC-Regular.ttf</file>
+        <file>Imgs/search.svg</file>
+        <file>Imgs/info.svg</file>
+        <file>Imgs/error.svg</file>
+        <file>Imgs/warning.svg</file>
+        <file>Imgs/true.svg</file>
+        <file>Imgs/downArrow.svg</file>
+        <file>Imgs/upArrow.svg</file>
+        <file>Imgs/noData.svg</file>
+    </qresource>
+</RCC>

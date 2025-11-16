@@ -4,7 +4,8 @@
 #include <QWidget>
 #include <QPainter>
 #include <QPainterPath>
-#include "ElaTheme.h"
+#include <QVBoxLayout>
+#include "DesignSystem.h"
 
 class CardWidget : public QWidget
 {
@@ -21,6 +22,11 @@ public:
         
         // 设置边距以容纳阴影
         setContentsMargins(15, 15, 15, 15);
+        
+        // 创建布局
+        QVBoxLayout* mainLayout = new QVBoxLayout(this);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
+        mainLayout->setSpacing(0);
     }
 
     void setBorderRadius(int radius)
@@ -44,7 +50,7 @@ protected:
         painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
         
         // 获取主题模式
-        ElaThemeType::ThemeMode themeMode = ElaTheme::getInstance()->getThemeMode();
+        DesignSystem::ThemeMode themeMode = DesignSystem::instance()->themeMode();
         
         // 计算实际绘制区域（考虑阴影边距）
         QRectF cardRect = rect().adjusted(10, 10, -10, -10);
@@ -58,7 +64,7 @@ protected:
                 QRectF shadowRect = cardRect.adjusted(-i*1.5, -i*1.5, i*1.5, i*1.5);
                 shadowPath.addRoundedRect(shadowRect, m_borderRadius + i, m_borderRadius + i);
                 
-                QColor shadowColor = (themeMode == ElaThemeType::Light) 
+                QColor shadowColor = (themeMode == DesignSystem::Light) 
                     ? QColor(0, 0, 0, 15 - i*3) 
                     : QColor(0, 0, 0, 25 - i*5);
                 
@@ -72,7 +78,7 @@ protected:
         
         // 根据主题设置卡片颜色
         QColor cardColor;
-        if (themeMode == ElaThemeType::Light)
+        if (themeMode == DesignSystem::Light)
         {
             cardColor = QColor(255, 255, 255, 250);
         }
@@ -91,7 +97,7 @@ protected:
         
         // 绘制边框
         painter.setPen(QPen(
-            (themeMode == ElaThemeType::Light) 
+            (themeMode == DesignSystem::Light) 
                 ? QColor(220, 220, 220, 150) 
                 : QColor(70, 70, 70, 150),
             1
@@ -105,4 +111,3 @@ private:
 };
 
 #endif // CARDWIDGET_H
-

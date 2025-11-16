@@ -1,19 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ElaWindow.h"
-#include "ElaTableView.h"
-#include "ElaLineEdit.h"
-#include "ElaPushButton.h"
-#include "ElaComboBox.h"
-#include "ElaSpinBox.h"
-#include "ElaText.h"
-#include "ElaMessageBar.h"
-#include "ElaContentDialog.h"
-#include "cardwidget.h"
-#include <QStandardItemModel>
+#include <QMainWindow>
+#include <QTableWidget>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QPushButton>
 #include <QVector>
 #include "student.h"
+#include "AntButton.h"
+#include "AntMessageManager.h"
+#include "cardwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,7 +19,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public ElaWindow
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -42,23 +40,22 @@ private slots:
 private:
     Ui::MainWindow *ui;
     
-    // UI控件 - 使用 Ela 组件
-    ElaTableView *tableWidget;
-    QStandardItemModel *tableModel;
-    ElaLineEdit *lineEditId;
-    ElaLineEdit *lineEditName;
-    ElaComboBox *comboBoxGender;
-    ElaSpinBox *spinBoxAge;
-    ElaLineEdit *lineEditMajor;
-    ElaLineEdit *lineEditSearch;
+    // UI控件
+    QTableWidget *tableWidget;
+    QLineEdit *lineEditId;
+    QLineEdit *lineEditName;
+    QComboBox *comboBoxGender;
+    QSpinBox *spinBoxAge;
+    QLineEdit *lineEditMajor;
+    QLineEdit *lineEditSearch;
     
-    ElaPushButton *btnAdd;
-    ElaPushButton *btnDelete;
-    ElaPushButton *btnModify;
-    ElaPushButton *btnSearch;
-    ElaPushButton *btnClear;
-    ElaPushButton *btnRefresh;
-    ElaPushButton *btnSort;
+    AntButton *btnAdd;
+    AntButton *btnDelete;
+    AntButton *btnModify;
+    AntButton *btnSearch;
+    AntButton *btnClear;
+    AntButton *btnRefresh;
+    AntButton *btnSort;
     
     // 数据存储
     QVector<Student> students;
@@ -71,5 +68,6 @@ private:
     void clearInputFields();    // 清空输入框
     bool validateInput();       // 验证输入
     int findStudentById(const QString &id);  // 根据学号查找学生
+    void showMessage(AntMessage::Type type, const QString& message);  // 显示消息
 };
 #endif // MAINWINDOW_H

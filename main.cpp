@@ -1,39 +1,46 @@
 #include "mainwindow.h"
-#include "ElaApplication.h"
+#include "DesignSystem.h"
+#include "TransparentMask.h"
 
 #include <QApplication>
+#include <QFontDatabase>
+#include <QMessageBox>
 #include <QDebug>
-#include <QIcon>
 
 int main(int argc, char *argv[])
 {
-    qDebug() << "程序启动";
-    
     QApplication a(argc, argv);
     
-    // 设置应用程序图标
-    a.setWindowIcon(QIcon(":/icon.ico"));
+    qDebug() << "程序启动...";
     
-    qDebug() << "QApplication 创建成功";
+    // 加载 Noto Sans SC 字体（失败也继续运行）
+    int fontId = QFontDatabase::addApplicationFont(":/fonts/NotoSansSC-Regular.ttf");
+    if (fontId != -1) {
+        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
+        QFont font(family);
+        font.setPixelSize(14);
+        font.setHintingPreference(QFont::PreferNoHinting);
+        QApplication::setFont(font);
+        qDebug() << "字体加载成功:" << family;
+    } else {
+        qWarning() << "字体加载失败，使用系统默认字体";
+    }
     
-    // 初始化 ElaApplication
-    qDebug() << "开始初始化 ElaApplication";
-    ElaApplication::getInstance()->init();
-    qDebug() << "ElaApplication 初始化完成";
+    // 初始化设计系统
+    qDebug() << "初始化设计系统...";
+    DesignSystem::instance();
     
-    // 启用亚克力效果（Windows 11+ 支持 Acrylic, Windows 11 支持 Mica）
-#ifdef Q_OS_WIN
-    ElaApplication::getInstance()->setWindowDisplayMode(ElaApplicationType::Acrylic);
-    qDebug() << "已启用 Acrylic 亚克力效果";
-#endif
-    
-    qDebug() << "开始创建 MainWindow";
+    qDebug() << "创建主窗口...";
     MainWindow w;
-    qDebug() << "MainWindow 创建完成";
     
-    qDebug() << "显示窗口";
+    // 创建全局透明遮罩（在窗口创建后）
+    qDebug() << "创建透明遮罩...";
+    TransparentMask* tpMask = new TransparentMask(&w);
+    DesignSystem::instance()->setTransparentMask(tpMask);
+    
+    qDebug() << "显示窗口...";
     w.show();
-    qDebug() << "窗口已显示，进入事件循环";
     
+    qDebug() << "进入事件循环";
     return a.exec();
 }
