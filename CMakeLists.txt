@@ -27,6 +27,12 @@ set(PROJECT_SOURCES
         flatcardwidget.h
         loginwindow.cpp
         loginwindow.h
+        user.cpp
+        user.h
+        usermanager.cpp
+        usermanager.h
+        operationlog.cpp
+        operationlog.h
         resources.qrc
 )
 

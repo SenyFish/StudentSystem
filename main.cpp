@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "loginwindow.h"
+#include "usermanager.h"
 #include "ElaApplication.h"
 
 #include <QApplication>
@@ -7,13 +8,16 @@
 #include <QIcon>
 #include <QTimer>
 #include <QLabel>
-#include <QCoreApplication>
-#include <QThread>
-#include <QEventLoop>
+#include <QPointer>
 
 int main(int argc, char *argv[])
 {
     qDebug() << "程序启动";
+    
+    // 在 QApplication 创建前设置 DPI 缩放属性（最重要的修复）
+    // 这会让 Qt 自动处理高 DPI 屏幕的缩放
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     
     QApplication a(argc, argv);
     
@@ -50,77 +54,111 @@ int main(int argc, char *argv[])
     loginWindow->setWindowTitle("学生信息管理系统 - 登录");
     loginWindow->resize(1200, 800);
     
-    // 显示提示信息
-    QTimer::singleShot(800, [loginWindow]() {
-        if (loginWindow && loginWindow->isVisible()) {
-            QLabel *hintLabel = new QLabel("默认用户名和密码：root", loginWindow);
-            hintLabel->setStyleSheet(R"(
-                QLabel {
-                    color: rgb(100, 120, 180);
-                    background-color: rgba(200, 220, 255, 150);
-                    border-radius: 5px;
-                    padding: 8px 15px;
-                    font-size: 13px;
-                }
-            )");
-            hintLabel->adjustSize();
-            int x = (loginWindow->width() - hintLabel->width()) / 2;
-            int y = loginWindow->height() - 100;
-            hintLabel->move(x, y);
-            hintLabel->show();
-            
-            // 5秒后消失
-            QTimer::singleShot(5000, hintLabel, &QLabel::deleteLater);
-        }
-    });
+    // 设置主窗口引用，用于自动创建学生账户
+    loginWindow->setMainWindow(mainWindow);
+    
     
     // 连接登录成功信号
-    QObject::connect(loginWindow, &LoginWindow::loginClicked, [mainWindow, loginWindow, &a](const QString &username, const QString &password) {
-        qDebug() << "登录尝试 - 用户名:" << username;
+    QObject::connect(loginWindow, &LoginWindow::loginSuccess, [mainWindow, loginWindow, &a](const QString &username) {
+        qDebug() << "登录成功信号收到，用户名:" << username;
         
-        // 验证用户名和密码（默认都是 root）
-        if (username == "root" && password == "root") {
-            qDebug() << "登录成功，准备显示主窗口";
-            
-            // 更新主窗口标题
-            mainWindow->setWindowTitle("学生信息管理系统 - " + username);
-            
-            // 先关闭登录窗口
-            loginWindow->close();
-            
-            // 先关闭登录窗口动画，立即显示主窗口（避免间隙）
-            loginWindow->hide();
-            
-            // 临时禁用主窗口的拖动功能，防止在初始化时拖动导致卡死
-            mainWindow->setEnabled(false);
-            
-            // 显示主窗口
-            mainWindow->show();
-            
-            // 立即处理所有待处理事件，确保窗口完全渲染
-            for (int i = 0; i < 10; ++i) {
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
-                QThread::msleep(20); // 每次间隔20ms，总共200ms
+        // 从UserManager获取用户信息
+        User user = UserManager::getInstance().getCurrentUser();
+        UserRole userRole = user.getRole();
+        QString realName = user.getRealName();
+        QString roleString = user.getRoleString();
+        QString studentId = user.getStudentId();  // 获取关联的学生ID
+        QString major = user.getMajor();  // 获取关联的专业
+        
+        qDebug() << "用户信息获取完成:" << realName << roleString << "学生ID:" << studentId << "专业:" << major;
+        
+        // 更新主窗口标题
+        if (mainWindow) {
+            QString title = QString("学生信息管理系统 - %1（%2）").arg(realName).arg(roleString);
+            if (userRole == UserRole::Student && !studentId.isEmpty()) {
+                title += QString(" - 学号：%1").arg(studentId);
+            } else if (userRole == UserRole::Teacher && !major.isEmpty()) {
+                title += QString(" - 专业：%1").arg(major);
             }
-            
-            qDebug() << "主窗口已显示";
-            
-            // 等待窗口布局完全完成后再启用交互（防止拖动卡死）
-            QTimer::singleShot(500, [mainWindow]() {
-                mainWindow->setEnabled(true);
-                qDebug() << "主窗口交互已启用";
-            });
-            
-            // 延迟删除登录窗口和恢复退出设置
-            QTimer::singleShot(600, [loginWindow, &a]() {
-                loginWindow->deleteLater();
-                // 恢复默认行为：当最后一个窗口关闭时退出程序
-                a.setQuitOnLastWindowClosed(true);
-                qDebug() << "清理完成，窗口已完全初始化";
-            });
-        } else {
-            qDebug() << "登录失败 - 用户名或密码错误";
+            mainWindow->setWindowTitle(title);
         }
+        
+        // 先隐藏登录窗口（不关闭，避免程序退出）
+        if (loginWindow) {
+            loginWindow->hide();
+        }
+        
+        qDebug() << "准备显示主窗口";
+        
+        // 使用指针来安全管理生命周期
+        QPointer<MainWindow> mainWindowPtr(mainWindow);
+        QPointer<LoginWindow> loginWindowPtr(loginWindow);
+        
+        // 第一步：设置用户权限
+        QTimer::singleShot(50, [mainWindowPtr, loginWindowPtr, userRole, studentId, major]() {
+            if (!mainWindowPtr) return;
+            
+            qDebug() << "开始预加载主窗口 - 设置权限";
+            
+            // 先设置用户权限（在显示前），传递学生ID和专业
+            mainWindowPtr->setUserRole(userRole, studentId, major);
+            
+            // 第二步：等待布局计算完成
+            QTimer::singleShot(300, [mainWindowPtr, loginWindowPtr]() {
+                if (!mainWindowPtr) return;
+                
+                qDebug() << "预加载 - 强制更新布局";
+                
+                // 强制更新布局（窗口隐藏时）
+                mainWindowPtr->update();
+                mainWindowPtr->updateGeometry();
+                mainWindowPtr->adjustSize();
+                
+                // 第三步：再等待一段时间确保布局稳定
+                QTimer::singleShot(200, [mainWindowPtr, loginWindowPtr]() {
+                    if (!mainWindowPtr) return;
+                    
+                    qDebug() << "主窗口预加载完成，准备显示";
+                    
+                    // 现在显示窗口（此时所有布局已经计算完成）
+                    mainWindowPtr->show();
+                    
+                    // 主窗口已显示，现在可以安全关闭登录窗口
+                    if (loginWindowPtr) {
+                        loginWindowPtr->close();
+                    }
+                    
+                    qDebug() << "主窗口已显示，等待展开动画完成";
+                    
+                    // 第四步：等待ElaWindow的展开动画完成
+                    QTimer::singleShot(1000, [mainWindowPtr]() {
+                        if (!mainWindowPtr) return;
+                        
+                        if (!mainWindowPtr->isVisible()) {
+                            qDebug() << "主窗口不可见";
+                            return;
+                        }
+                        
+                        qDebug() << "展开动画完成，启用窗口交互";
+                        
+                        // 启用窗口交互
+                        mainWindowPtr->setEnabled(true);
+                        
+                        qDebug() << "主窗口完全就绪，可以安全交互";
+                    });
+                });
+            });
+        });
+        
+        // 清理登录窗口和恢复退出设置（在主窗口完全就绪后）
+        QTimer::singleShot(1700, [loginWindowPtr, &a]() {
+            if (loginWindowPtr) {
+                loginWindowPtr->deleteLater();
+            }
+            // 主窗口已显示，现在可以恢复默认退出行为
+            a.setQuitOnLastWindowClosed(true);
+            qDebug() << "登录窗口已清理，退出设置已恢复";
+        });
     });
     
     // 显示登录窗口
