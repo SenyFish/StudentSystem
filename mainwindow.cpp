@@ -36,14 +36,6 @@ MainWindow::MainWindow(QWidget *parent)
     , currentUserRole(UserRole::Student)  // 默认角色
     , m_leftCardWidget(nullptr)
     , m_rightCardWidget(nullptr)
-    , m_studentInfoWidget(nullptr)
-    , m_studentInfoCard(nullptr)
-    , m_studentIdLabel(nullptr)
-    , m_studentNameLabel(nullptr)
-    , m_studentGenderLabel(nullptr)
-    , m_studentAgeLabel(nullptr)
-    , m_studentMajorLabel(nullptr)
-    , m_studentEditButton(nullptr)
     , m_cardViewWidget(nullptr)
     , m_cardScrollArea(nullptr)
     , m_cardContainer(nullptr)
@@ -184,9 +176,6 @@ void MainWindow::setUserRole(UserRole role, const QString &studentId, const QStr
     }
     if (m_rightCardWidget) {
         m_rightCardWidget->setVisible(isAdmin);  // 只有管理员显示表格
-    }
-    if (m_studentInfoWidget) {
-        m_studentInfoWidget->setVisible(false);  // 不再使用旧的单卡片显示，改用卡片视图
     }
     if (m_cardViewWidget) {
         m_cardViewWidget->setVisible(isTeacher || isStudent);  // 教师和学生显示卡片视图
@@ -808,112 +797,6 @@ void MainWindow::initUI()
     rightLayout->addLayout(topLayout);
     rightLayout->addWidget(tableWidget);
     
-    // 创建学生信息展示卡片（初始隐藏）
-    m_studentInfoWidget = new QWidget(centralWidget);
-    QVBoxLayout* studentLayout = new QVBoxLayout(m_studentInfoWidget);
-    studentLayout->setContentsMargins(0, 0, 0, 0);
-    studentLayout->setSpacing(0);
-    
-    m_studentInfoCard = new FlatCardWidget(m_studentInfoWidget);
-    m_studentInfoCard->setElevation(2);
-    QVBoxLayout* studentCardLayout = new QVBoxLayout(m_studentInfoCard);
-    studentCardLayout->setContentsMargins(40, 40, 40, 40);
-    studentCardLayout->setSpacing(25);
-    
-    // 标题
-    ElaText* studentTitle = new ElaText("我的信息", m_studentInfoCard);
-    studentTitle->setTextPixelSize(28);
-    studentTitle->setStyleSheet("font-weight: bold;");
-    studentCardLayout->addWidget(studentTitle);
-    
-    studentCardLayout->addSpacing(10);
-    
-    // 信息项
-    QHBoxLayout* idLayout = new QHBoxLayout();
-    ElaText* idLabel = new ElaText("学号：", m_studentInfoCard);
-    idLabel->setTextPixelSize(16);
-    idLabel->setFixedWidth(80);
-    m_studentIdLabel = new ElaText("", m_studentInfoCard);
-    m_studentIdLabel->setTextPixelSize(18);
-    m_studentIdLabel->setStyleSheet("font-weight: bold; color: #667eea;");
-    idLayout->addWidget(idLabel);
-    idLayout->addWidget(m_studentIdLabel);
-    idLayout->addStretch();
-    studentCardLayout->addLayout(idLayout);
-    
-    QHBoxLayout* nameLayout = new QHBoxLayout();
-    ElaText* nameLabel = new ElaText("姓名：", m_studentInfoCard);
-    nameLabel->setTextPixelSize(16);
-    nameLabel->setFixedWidth(80);
-    m_studentNameLabel = new ElaText("", m_studentInfoCard);
-    m_studentNameLabel->setTextPixelSize(18);
-    m_studentNameLabel->setStyleSheet("font-weight: bold;");
-    nameLayout->addWidget(nameLabel);
-    nameLayout->addWidget(m_studentNameLabel);
-    nameLayout->addStretch();
-    studentCardLayout->addLayout(nameLayout);
-    
-    QHBoxLayout* genderLayout = new QHBoxLayout();
-    ElaText* genderLabel = new ElaText("性别：", m_studentInfoCard);
-    genderLabel->setTextPixelSize(16);
-    genderLabel->setFixedWidth(80);
-    m_studentGenderLabel = new ElaText("", m_studentInfoCard);
-    m_studentGenderLabel->setTextPixelSize(18);
-    m_studentGenderLabel->setStyleSheet("font-weight: bold;");
-    genderLayout->addWidget(genderLabel);
-    genderLayout->addWidget(m_studentGenderLabel);
-    genderLayout->addStretch();
-    studentCardLayout->addLayout(genderLayout);
-    
-    QHBoxLayout* ageLayout = new QHBoxLayout();
-    ElaText* ageLabel = new ElaText("年龄：", m_studentInfoCard);
-    ageLabel->setTextPixelSize(16);
-    ageLabel->setFixedWidth(80);
-    m_studentAgeLabel = new ElaText("", m_studentInfoCard);
-    m_studentAgeLabel->setTextPixelSize(18);
-    m_studentAgeLabel->setStyleSheet("font-weight: bold;");
-    ageLayout->addWidget(ageLabel);
-    ageLayout->addWidget(m_studentAgeLabel);
-    ageLayout->addStretch();
-    studentCardLayout->addLayout(ageLayout);
-    
-    QHBoxLayout* majorLayout = new QHBoxLayout();
-    ElaText* majorLabel = new ElaText("专业：", m_studentInfoCard);
-    majorLabel->setTextPixelSize(16);
-    majorLabel->setFixedWidth(80);
-    m_studentMajorLabel = new ElaText("", m_studentInfoCard);
-    m_studentMajorLabel->setTextPixelSize(18);
-    m_studentMajorLabel->setStyleSheet("font-weight: bold;");
-    majorLayout->addWidget(majorLabel);
-    majorLayout->addWidget(m_studentMajorLabel);
-    majorLayout->addStretch();
-    studentCardLayout->addLayout(majorLayout);
-    
-    studentCardLayout->addStretch();
-    
-    // 编辑按钮
-    m_studentEditButton = new ElaPushButton("编辑信息", m_studentInfoCard);
-    m_studentEditButton->setFixedHeight(45);
-    m_studentEditButton->setStyleSheet(R"(
-        ElaPushButton {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                       stop:0 #667eea, stop:1 #764ba2);
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 10px;
-        }
-        ElaPushButton:hover {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                       stop:0 #7a8df5, stop:1 #8a5fb8);
-        }
-    )");
-    connect(m_studentEditButton, &ElaPushButton::clicked, this, &MainWindow::onStudentEditInfo);
-    studentCardLayout->addWidget(m_studentEditButton);
-    
-    studentLayout->addWidget(m_studentInfoCard);
-    m_studentInfoWidget->setVisible(false);  // 初始隐藏
-    
     // ===== 创建卡片视图（用于教师和学生） =====
     m_cardViewWidget = new QWidget(centralWidget);
     QVBoxLayout* cardViewLayout = new QVBoxLayout(m_cardViewWidget);
@@ -942,7 +825,6 @@ void MainWindow::initUI()
     m_leftCardWidget = leftCard;  // 保存引用，用于学生角色隐藏
     mainLayout->addWidget(rightCard, 5);  // 右侧占 5 份（管理员使用表格）
     m_rightCardWidget = rightCard;  // 保存引用，用于学生角色隐藏
-    mainLayout->addWidget(m_studentInfoWidget, 7);  // 学生信息卡片（替代右侧表格）
     mainLayout->addWidget(m_cardViewWidget, 5);  // 卡片视图（教师和学生使用）
     
     qDebug() << "centralWidget 大小:" << centralWidget->size();
@@ -1453,6 +1335,7 @@ void MainWindow::onDeleteStudent()
     
     // 使用 ElaContentDialog 进行确认
     ElaContentDialog* dialog = new ElaContentDialog(this);
+    dialog->setMiddleButtonVisible(false);
     dialog->setAttribute(Qt::WA_DeleteOnClose); // 确保对话框关闭时自动释放内存
     dialog->setWindowTitle("确认删除");
     
@@ -1754,40 +1637,25 @@ void MainWindow::onImportCSV()
     QTextStream in(&file);
     in.setEncoding(QStringConverter::Utf8);  // 设置UTF-8编码
     
-    // 跳过BOM（如果存在）
-    QString firstLine = in.readLine();
-    if (firstLine.startsWith("\xEF\xBB\xBF")) {
-        firstLine = firstLine.mid(3);
-    }
-    
-    // 检查是否是表头行（如果是则跳过）
-    if (firstLine.contains("学号") || firstLine.contains("姓名")) {
-        // 表头行，已跳过
-    } else {
-        // 不是表头，需要处理这一行
-        in.seek(0);  // 重置到文件开头
-    }
-    
     int successCount = 0;
     int skipCount = 0;
     int errorCount = 0;
     QStringList errorMessages;
     
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        
-        // 跳过空行
-        if (line.isEmpty()) {
-            continue;
+    auto recordError = [&](const QString& message) {
+        errorCount++;
+        errorMessages << message;
+    };
+    
+    auto processLine = [&](const QString& trimmedLine, int lineNumber) {
+        if (trimmedLine.isEmpty()) {
+            return;
         }
         
-        // 解析CSV行
-        QStringList fields = line.split(',');
-        
+        QStringList fields = trimmedLine.split(',');
         if (fields.size() < 5) {
-            errorCount++;
-            errorMessages << QString("第%1行：字段数量不足").arg(successCount + skipCount + errorCount + 1);
-            continue;
+            recordError(QString("第%1行：字段数量不足").arg(lineNumber));
+            return;
         }
         
         QString id = fields[0].trimmed();
@@ -1796,49 +1664,60 @@ void MainWindow::onImportCSV()
         QString ageStr = fields[3].trimmed();
         QString major = fields[4].trimmed();
         
-        // 验证学号格式
-        QRegularExpression idPattern("^\\d{7}$");
+        static const QRegularExpression idPattern("^\\d{7}$");
         if (!idPattern.match(id).hasMatch()) {
-            errorCount++;
-            errorMessages << QString("第%1行：学号格式错误 (%2)").arg(successCount + skipCount + errorCount + 1).arg(id);
-            continue;
+            recordError(QString("第%1行：学号格式错误 (%2)").arg(lineNumber).arg(id));
+            return;
         }
         
-        // 检查学号是否已存在
         if (findStudentById(id) != -1) {
             skipCount++;
-            continue;  // 跳过已存在的学号
+            return;
         }
         
-        // 验证年龄
-        bool ok;
+        bool ok = false;
         int age = ageStr.toInt(&ok);
         if (!ok || age < 15 || age > 100) {
-            errorCount++;
-            errorMessages << QString("第%1行：年龄无效 (%2)").arg(successCount + skipCount + errorCount + 1).arg(ageStr);
+            recordError(QString("第%1行：年龄无效 (%2)").arg(lineNumber).arg(ageStr));
+            return;
+        }
+        
+        if (currentUserRole == UserRole::Teacher && !currentUserMajor.isEmpty() && major != currentUserMajor) {
+            skipCount++;
+            return;
+        }
+        
+        students.append(Student(id, name, gender, age, major));
+        successCount++;
+    };
+    
+    int lineNumber = 0;
+    bool headerSkipped = false;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        lineNumber++;
+        
+        if (lineNumber == 1 && line.startsWith("\xEF\xBB\xBF")) {
+            line = line.mid(3);
+        }
+        
+        QString trimmedLine = line.trimmed();
+        if (trimmedLine.isEmpty()) {
             continue;
         }
         
-        // 如果是教师角色，只能导入自己专业的学生
-        if (currentUserRole == UserRole::Teacher && !currentUserMajor.isEmpty()) {
-            if (major != currentUserMajor) {
-                skipCount++;
-                continue;  // 跳过不是自己专业的学生
-            }
+        if (!headerSkipped && (trimmedLine.contains("学号") || trimmedLine.contains("姓名"))) {
+            headerSkipped = true;
+            continue;
         }
         
-        // 添加学生
-        Student newStudent(id, name, gender, age, major);
-        students.append(newStudent);
-        successCount++;
+        processLine(trimmedLine, lineNumber);
     }
     
     file.close();
     
-    // 更新表格
     updateTable();
     
-    // 显示导入结果
     QString resultMsg = QString("成功导入：%1 条\n").arg(successCount);
     if (skipCount > 0) {
         resultMsg += QString("跳过重复：%1 条\n").arg(skipCount);
@@ -1852,7 +1731,6 @@ void MainWindow::onImportCSV()
         }
     }
     
-    // 记录日志
     if (successCount > 0) {
         QString currentUser = UserManager::getInstance().hasUser() ? 
                              UserManager::getInstance().getCurrentUser().getUsername() : "未知用户";
@@ -1894,7 +1772,7 @@ void MainWindow::onBatchDelete()
     
     // 确认对话框
     ElaContentDialog* dialog = new ElaContentDialog(this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose); // 确保自动删除
+    dialog->setMiddleButtonVisible(false);
     dialog->setWindowTitle("批量删除确认");
     
     QWidget* dialogWidget = new QWidget(this);
@@ -1936,6 +1814,7 @@ void MainWindow::onBatchDelete()
     connect(dialog, &ElaContentDialog::leftButtonClicked, dialog, &ElaContentDialog::close);
     
     dialog->exec();
+    dialog->deleteLater();
 }
 
 void MainWindow::onBatchModifyMajor()
@@ -1960,6 +1839,7 @@ void MainWindow::onBatchModifyMajor()
     
     // 创建对话框选择新专业
     ElaContentDialog* dialog = new ElaContentDialog(this);
+    dialog->setMiddleButtonVisible(false);
     dialog->setAttribute(Qt::WA_DeleteOnClose); // 确保自动删除
     dialog->setWindowTitle("批量修改专业");
     dialog->resize(450, 250);
@@ -2047,31 +1927,6 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
     return ElaWindow::eventFilter(watched, event);
 }
 
-void MainWindow::updateStudentInfoCard()
-{
-    if (!m_studentIdLabel || currentUserStudentId.isEmpty()) {
-        return;
-    }
-    
-    // 查找学生信息
-    int index = findStudentById(currentUserStudentId);
-    if (index == -1) {
-        m_studentIdLabel->setText("未找到");
-        m_studentNameLabel->setText("未找到");
-        m_studentGenderLabel->setText("-");
-        m_studentAgeLabel->setText("-");
-        m_studentMajorLabel->setText("-");
-        return;
-    }
-    
-    const Student& student = students[index];
-    m_studentIdLabel->setText(student.getId());
-    m_studentNameLabel->setText(student.getName());
-    m_studentGenderLabel->setText(student.getGender());
-    m_studentAgeLabel->setText(QString::number(student.getAge()));
-    m_studentMajorLabel->setText(student.getMajor());
-}
-
 void MainWindow::onStudentEditInfo()
 {
     if (currentUserStudentId.isEmpty()) {
@@ -2090,21 +1945,22 @@ void MainWindow::onStudentEditInfo()
     
     // 创建编辑对话框
     ElaContentDialog* dialog = new ElaContentDialog(this);
+    dialog->setMiddleButtonVisible(false);
     dialog->setAttribute(Qt::WA_DeleteOnClose); // 确保自动删除
     dialog->setWindowTitle("编辑我的信息");
     dialog->resize(500, 400);
     
-    QWidget* dialogWidget = new QWidget(this);
+    QWidget* dialogWidget = new QWidget(dialog);
     QVBoxLayout* dialogLayout = new QVBoxLayout(dialogWidget);
     dialogLayout->setSpacing(20);
     dialogLayout->setContentsMargins(30, 30, 30, 30);
     
     // 学号（不可编辑）
     QHBoxLayout* idLayout = new QHBoxLayout();
-    ElaText* idLabel = new ElaText("学号：", this);
+    ElaText* idLabel = new ElaText("学号：", dialogWidget);
     idLabel->setTextPixelSize(15);
     idLabel->setFixedWidth(80);
-    ElaLineEdit* idInput = new ElaLineEdit(this);
+    ElaLineEdit* idInput = new ElaLineEdit(dialogWidget);
     idInput->setText(student.getId());
     idInput->setEnabled(false);  // 学号不可修改
     idInput->setFixedHeight(40);
@@ -2114,10 +1970,10 @@ void MainWindow::onStudentEditInfo()
     
     // 姓名
     QHBoxLayout* nameLayout = new QHBoxLayout();
-    ElaText* nameLabel = new ElaText("姓名：", this);
+    ElaText* nameLabel = new ElaText("姓名：", dialogWidget);
     nameLabel->setTextPixelSize(15);
     nameLabel->setFixedWidth(80);
-    ElaLineEdit* nameInput = new ElaLineEdit(this);
+    ElaLineEdit* nameInput = new ElaLineEdit(dialogWidget);
     nameInput->setText(student.getName());
     nameInput->setFixedHeight(40);
     nameLayout->addWidget(nameLabel);
@@ -2126,10 +1982,10 @@ void MainWindow::onStudentEditInfo()
     
     // 性别
     QHBoxLayout* genderLayout = new QHBoxLayout();
-    ElaText* genderLabel = new ElaText("性别：", this);
+    ElaText* genderLabel = new ElaText("性别：", dialogWidget);
     genderLabel->setTextPixelSize(15);
     genderLabel->setFixedWidth(80);
-    ElaComboBox* genderCombo = new ElaComboBox(this);
+    ElaComboBox* genderCombo = new ElaComboBox(dialogWidget);
     genderCombo->addItem("男");
     genderCombo->addItem("女");
     genderCombo->setCurrentText(student.getGender());
@@ -2140,10 +1996,10 @@ void MainWindow::onStudentEditInfo()
     
     // 年龄
     QHBoxLayout* ageLayout = new QHBoxLayout();
-    ElaText* ageLabel = new ElaText("年龄：", this);
+    ElaText* ageLabel = new ElaText("年龄：", dialogWidget);
     ageLabel->setTextPixelSize(15);
     ageLabel->setFixedWidth(80);
-    ElaSpinBox* ageSpin = new ElaSpinBox(this);
+    ElaSpinBox* ageSpin = new ElaSpinBox(dialogWidget);
     ageSpin->setMinimum(15);
     ageSpin->setMaximum(100);
     ageSpin->setValue(student.getAge());
@@ -2154,10 +2010,10 @@ void MainWindow::onStudentEditInfo()
     
     // 专业
     QHBoxLayout* majorLayout = new QHBoxLayout();
-    ElaText* majorLabel = new ElaText("专业：", this);
+    ElaText* majorLabel = new ElaText("专业：", dialogWidget);
     majorLabel->setTextPixelSize(15);
     majorLabel->setFixedWidth(80);
-    ElaComboBox* majorCombo = new ElaComboBox(this);
+    ElaComboBox* majorCombo = new ElaComboBox(dialogWidget);
     majorCombo->addItem("计算机科学");
     majorCombo->addItem("软件工程");
     majorCombo->addItem("信息安全");
@@ -2178,7 +2034,7 @@ void MainWindow::onStudentEditInfo()
     dialog->setLeftButtonText("取消");
     dialog->setRightButtonText("保存");
     
-    connect(dialog, &ElaContentDialog::rightButtonClicked, this, [this, index, nameInput, genderCombo, ageSpin, majorCombo, dialog](){
+    connect(dialog, &ElaContentDialog::rightButtonClicked, this, [this, index, nameInput, genderCombo, ageSpin, majorCombo](){
         QString name = nameInput->text().trimmed();
         QString gender = genderCombo->currentText();
         int age = ageSpin->value();
@@ -2209,10 +2065,7 @@ void MainWindow::onStudentEditInfo()
                                   QString("信息已更新！"), 3000, this);
         }
         
-        dialog->close(); // 关闭对话框
     });
-    
-    connect(dialog, &ElaContentDialog::leftButtonClicked, dialog, &ElaContentDialog::close);
     
     dialog->exec();
 }

@@ -2,7 +2,6 @@
 #include "cardwidget.h"
 #include "ElaLineEdit.h"
 #include "ElaPushButton.h"
-#include "ElaComboBox.h"
 #include "ElaText.h"
 #include "ElaMessageBar.h"
 #include "ElaContentDialog.h"
@@ -17,7 +16,6 @@
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
 #include <QPixmap>
-#include <QStackedWidget>
 #include <QRegularExpression>
 
 LoginWindow::LoginWindow(QWidget *parent)
@@ -31,20 +29,7 @@ LoginWindow::LoginWindow(QWidget *parent)
     , m_passwordInput(nullptr)
     , m_mainWindow(nullptr)
     , m_loginButton(nullptr)
-    , m_toRegisterButton(nullptr)
     , m_accountInfoButton(nullptr)
-    , m_registerWidget(nullptr)
-    , m_regUsernameInput(nullptr)
-    , m_regPasswordInput(nullptr)
-    , m_regPasswordConfirmInput(nullptr)
-    , m_regRealNameInput(nullptr)
-    , m_regRoleComboBox(nullptr)
-    , m_regStudentIdInput(nullptr)
-    , m_regStudentIdLabel(nullptr)
-    , m_regMajorComboBox(nullptr)
-    , m_regMajorLabel(nullptr)
-    , m_registerButton(nullptr)
-    , m_toLoginButton(nullptr)
 {
     // 配置 ElaWindow
     setWindowTitle("学生信息管理系统 - 登录");
@@ -137,11 +122,8 @@ void LoginWindow::setupUI()
     cardLayout->addWidget(m_subtitleLabel);
     cardLayout->addSpacing(10);
     
-    // 创建堆叠布局（用于切换登录/注册界面）
-    QStackedWidget *stackedWidget = new QStackedWidget(cardContentWidget);
-    
     // ===== 登录界面 =====
-    m_loginWidget = new QWidget();
+    m_loginWidget = new QWidget(cardContentWidget);
     QVBoxLayout *loginLayout = new QVBoxLayout(m_loginWidget);
     loginLayout->setSpacing(15);
     loginLayout->setContentsMargins(0, 0, 0, 0);
@@ -230,182 +212,7 @@ void LoginWindow::setupUI()
     connect(m_accountInfoButton, &ElaPushButton::clicked, this, &LoginWindow::onAccountInfoButtonClicked);
     loginLayout->addWidget(m_accountInfoButton);
     
-    loginLayout->addSpacing(8);
-    
-    // 跳转到注册按钮
-    m_toRegisterButton = new ElaPushButton("还没有账号？立即注册", m_loginWidget);
-    m_toRegisterButton->setFixedHeight(40);
-    m_toRegisterButton->setStyleSheet(R"(
-        ElaPushButton {
-            background: transparent;
-            color: #667eea;
-            font-size: 13px;
-            border: none;
-        }
-        ElaPushButton:hover {
-            color: #7a8df5;
-            text-decoration: underline;
-        }
-    )");
-    connect(m_toRegisterButton, &ElaPushButton::clicked, this, &LoginWindow::switchToRegister);
-    loginLayout->addWidget(m_toRegisterButton);
-    
-    stackedWidget->addWidget(m_loginWidget);
-    
-    // ===== 注册界面 =====
-    m_registerWidget = new QWidget();
-    QVBoxLayout *registerLayout = new QVBoxLayout(m_registerWidget);
-    registerLayout->setSpacing(12);
-    registerLayout->setContentsMargins(0, 0, 0, 0);
-    
-    // 用户名输入
-    m_regUsernameInput = new ElaLineEdit(m_registerWidget);
-    m_regUsernameInput->setPlaceholderText("请输入用户名");
-    m_regUsernameInput->setFixedHeight(45);
-    m_regUsernameInput->setStyleSheet(R"(
-        ElaLineEdit {
-            font-size: 14px;
-            padding: 0 15px;
-            border: 2px solid transparent;
-            border-radius: 10px;
-            background-color: rgba(102, 126, 234, 0.08);
-        }
-        ElaLineEdit:focus {
-            border: 2px solid #667eea;
-        }
-    )");
-    registerLayout->addWidget(m_regUsernameInput);
-    
-    // 密码输入
-    m_regPasswordInput = new ElaLineEdit(m_registerWidget);
-    m_regPasswordInput->setPlaceholderText("请输入密码");
-    m_regPasswordInput->setEchoMode(QLineEdit::Password);
-    m_regPasswordInput->setFixedHeight(45);
-    m_regPasswordInput->setStyleSheet(m_regUsernameInput->styleSheet());
-    registerLayout->addWidget(m_regPasswordInput);
-    
-    // 确认密码输入
-    m_regPasswordConfirmInput = new ElaLineEdit(m_registerWidget);
-    m_regPasswordConfirmInput->setPlaceholderText("请再次输入密码");
-    m_regPasswordConfirmInput->setEchoMode(QLineEdit::Password);
-    m_regPasswordConfirmInput->setFixedHeight(45);
-    m_regPasswordConfirmInput->setStyleSheet(m_regUsernameInput->styleSheet());
-    registerLayout->addWidget(m_regPasswordConfirmInput);
-    
-    // 真实姓名输入
-    m_regRealNameInput = new ElaLineEdit(m_registerWidget);
-    m_regRealNameInput->setPlaceholderText("请输入真实姓名");
-    m_regRealNameInput->setFixedHeight(45);
-    m_regRealNameInput->setStyleSheet(m_regUsernameInput->styleSheet());
-    registerLayout->addWidget(m_regRealNameInput);
-    
-    // 角色选择
-    m_regRoleComboBox = new ElaComboBox(m_registerWidget);
-    m_regRoleComboBox->addItem("学生");
-    m_regRoleComboBox->addItem("教师");
-    m_regRoleComboBox->setFixedHeight(45);
-    registerLayout->addWidget(m_regRoleComboBox);
-    
-    // 学号输入（仅学生角色显示）
-    m_regStudentIdLabel = new QLabel("学号", m_registerWidget);
-    m_regStudentIdLabel->setStyleSheet(R"(
-        QLabel {
-            color: #667eea;
-            font-size: 14px;
-            font-weight: bold;
-            padding-left: 2px;
-        }
-    )");
-    m_regStudentIdInput = new ElaLineEdit(m_registerWidget);
-    m_regStudentIdInput->setPlaceholderText("请输入您的学号（7位数字）");
-    m_regStudentIdInput->setFixedHeight(45);
-    m_regStudentIdInput->setStyleSheet(m_regUsernameInput->styleSheet());
-    m_regStudentIdInput->setVisible(false);  // 默认隐藏
-    m_regStudentIdLabel->setVisible(false);  // 默认隐藏
-    
-    // 专业选择（仅教师角色显示）
-    m_regMajorLabel = new QLabel("专业", m_registerWidget);
-    m_regMajorLabel->setStyleSheet(R"(
-        QLabel {
-            color: #667eea;
-            font-size: 14px;
-            font-weight: bold;
-            padding-left: 2px;
-        }
-    )");
-    m_regMajorComboBox = new ElaComboBox(m_registerWidget);
-    m_regMajorComboBox->addItem("计算机科学");
-    m_regMajorComboBox->addItem("软件工程");
-    m_regMajorComboBox->addItem("信息安全");
-    m_regMajorComboBox->addItem("数据科学");
-    m_regMajorComboBox->addItem("人工智能");
-    m_regMajorComboBox->addItem("网络工程");
-    m_regMajorComboBox->addItem("物联网工程");
-    m_regMajorComboBox->addItem("电子信息工程");
-    m_regMajorComboBox->addItem("通信工程");
-    m_regMajorComboBox->addItem("自动化");
-    m_regMajorComboBox->setFixedHeight(45);
-    m_regMajorComboBox->setVisible(false);  // 默认隐藏
-    m_regMajorLabel->setVisible(false);  // 默认隐藏
-    
-    // 监听角色选择变化，显示/隐藏学号输入框和专业选择框
-    connect(m_regRoleComboBox, QOverload<int>::of(&ElaComboBox::currentIndexChanged), 
-            this, [this](int index) {
-        bool isStudent = (index == 0);  // 0是"学生"
-        bool isTeacher = (index == 1);  // 1是"教师"
-        m_regStudentIdInput->setVisible(isStudent);
-        m_regStudentIdLabel->setVisible(isStudent);
-        m_regMajorComboBox->setVisible(isTeacher);
-        m_regMajorLabel->setVisible(isTeacher);
-    });
-    
-    registerLayout->addWidget(m_regStudentIdLabel);
-    registerLayout->addWidget(m_regStudentIdInput);
-    registerLayout->addWidget(m_regMajorLabel);
-    registerLayout->addWidget(m_regMajorComboBox);
-    
-    registerLayout->addSpacing(10);
-    
-    // 注册按钮
-    m_registerButton = new ElaPushButton("注 册", m_registerWidget);
-    m_registerButton->setFixedHeight(50);
-    m_registerButton->setStyleSheet(R"(
-        ElaPushButton {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                       stop:0 #43e97b, stop:1 #38f9d7);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 12px;
-        }
-        ElaPushButton:hover {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                       stop:0 #55f58d, stop:1 #4affea);
-        }
-    )");
-    connect(m_registerButton, &ElaPushButton::clicked, this, &LoginWindow::onRegisterButtonClicked);
-    registerLayout->addWidget(m_registerButton);
-    
-    // 返回登录按钮
-    m_toLoginButton = new ElaPushButton("已有账号？返回登录", m_registerWidget);
-    m_toLoginButton->setFixedHeight(36);
-    m_toLoginButton->setStyleSheet(R"(
-        ElaPushButton {
-            background: transparent;
-            color: #667eea;
-            font-size: 13px;
-            border: none;
-        }
-        ElaPushButton:hover {
-            color: #7a8df5;
-        }
-    )");
-    connect(m_toLoginButton, &ElaPushButton::clicked, this, &LoginWindow::switchToLogin);
-    registerLayout->addWidget(m_toLoginButton);
-    
-    stackedWidget->addWidget(m_registerWidget);
-    
-    cardLayout->addWidget(stackedWidget);
+    cardLayout->addWidget(m_loginWidget);
     
     // 将登录卡片添加到主布局
     QHBoxLayout *cardHLayout = new QHBoxLayout();
@@ -530,124 +337,6 @@ void LoginWindow::onLoginButtonClicked()
     }
 }
 
-void LoginWindow::onRegisterButtonClicked()
-{
-    QString username = m_regUsernameInput->text().trimmed();
-    QString password = m_regPasswordInput->text();
-    QString passwordConfirm = m_regPasswordConfirmInput->text();
-    QString realName = m_regRealNameInput->text().trimmed();
-    QString roleStr = m_regRoleComboBox->currentText();
-    QString studentId = m_regStudentIdInput->text().trimmed();
-    QString major = m_regMajorComboBox->currentText();
-    
-    // 验证输入
-    if (username.isEmpty()) {
-        showRegisterError("用户名不能为空！");
-        return;
-    }
-    
-    if (password.isEmpty()) {
-        showRegisterError("密码不能为空！");
-        return;
-    }
-    
-    if (password != passwordConfirm) {
-        showRegisterError("两次输入的密码不一致！");
-        return;
-    }
-    
-    if (password.length() < 4) {
-        showRegisterError("密码长度不能少于4位！");
-        return;
-    }
-    
-    if (realName.isEmpty()) {
-        showRegisterError("真实姓名不能为空！");
-        return;
-    }
-    
-    // 转换角色
-    UserRole role = User::stringToRole(roleStr);
-    
-    // 如果是学生角色，验证学号
-    if (role == UserRole::Student) {
-        if (studentId.isEmpty()) {
-            showRegisterError("学生角色必须输入学号！");
-            return;
-        }
-        
-        // 验证学号格式（7位数字）
-        QRegularExpression idPattern("^\\d{7}$");
-        if (!idPattern.match(studentId).hasMatch()) {
-            showRegisterError("学号格式不正确！\n学号必须是7位数字，例如：2021001");
-            return;
-        }
-    }
-    // 如果是教师角色，验证专业
-    else if (role == UserRole::Teacher) {
-        if (major.isEmpty()) {
-            showRegisterError("教师角色必须选择专业！");
-            return;
-        }
-    }
-    
-    // 注册用户（传递学号和专业）
-    if (UserManager::getInstance().registerUser(username, password, role, realName, studentId, major)) {
-        ElaMessageBar::success(ElaMessageBarType::TopRight, "注册成功", 
-                              "账号创建成功，请登录！", 2000, this);
-        
-        // 延迟切换到登录界面
-        QTimer::singleShot(500, this, &LoginWindow::switchToLogin);
-        
-        // 填充用户名
-        m_usernameInput->setText(username);
-        m_passwordInput->clear();
-    } else {
-        showRegisterError("注册失败！用户名可能已存在。");
-    }
-}
-
-void LoginWindow::switchToRegister()
-{
-    // 切换到注册界面
-    QStackedWidget *stackedWidget = m_loginCard->findChild<QStackedWidget*>();
-    if (stackedWidget) {
-        stackedWidget->setCurrentWidget(m_registerWidget);
-        m_subtitleLabel->setText("创建新账户");
-        
-        // 清空输入
-        m_regUsernameInput->clear();
-        m_regPasswordInput->clear();
-        m_regPasswordConfirmInput->clear();
-        m_regRealNameInput->clear();
-        m_regStudentIdInput->clear();
-        m_regMajorComboBox->setCurrentIndex(0);
-        m_regRoleComboBox->setCurrentIndex(0);
-        
-        // 根据角色显示/隐藏学号输入框和专业选择框
-        m_regStudentIdInput->setVisible(true);  // 默认是学生角色
-        m_regStudentIdLabel->setVisible(true);
-        m_regMajorComboBox->setVisible(false);
-        m_regMajorLabel->setVisible(false);
-        
-        // 设置焦点
-        QTimer::singleShot(100, m_regUsernameInput, QOverload<>::of(&ElaLineEdit::setFocus));
-    }
-}
-
-void LoginWindow::switchToLogin()
-{
-    // 切换到登录界面
-    QStackedWidget *stackedWidget = m_loginCard->findChild<QStackedWidget*>();
-    if (stackedWidget) {
-        stackedWidget->setCurrentWidget(m_loginWidget);
-        m_subtitleLabel->setText("欢迎回来，请登录您的账户");
-        
-        // 设置焦点
-        QTimer::singleShot(100, m_passwordInput, QOverload<>::of(&ElaLineEdit::setFocus));
-    }
-}
-
 void LoginWindow::showLoginError(const QString &message)
 {
     ElaMessageBar::error(ElaMessageBarType::TopRight, "登录失败", message, 3000, this);
@@ -669,25 +358,22 @@ void LoginWindow::showLoginError(const QString &message)
     shakeAnim->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void LoginWindow::showRegisterError(const QString &message)
-{
-    ElaMessageBar::error(ElaMessageBarType::TopRight, "注册失败", message, 3000, this);
-}
-
 void LoginWindow::onAccountInfoButtonClicked()
 {
     // 创建账号说明对话框
     ElaContentDialog* dialog = new ElaContentDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setMiddleButtonVisible(false);
     dialog->setWindowTitle("账号说明");
     dialog->resize(600, 500);
     
-    QWidget* dialogWidget = new QWidget(this);
+    QWidget* dialogWidget = new QWidget(dialog);
     QVBoxLayout* dialogLayout = new QVBoxLayout(dialogWidget);
     dialogLayout->setSpacing(20);
     dialogLayout->setContentsMargins(30, 30, 30, 30);
     
     // 标题
-    ElaText* titleText = new ElaText("账号登录说明", this);
+    ElaText* titleText = new ElaText("账号登录说明", dialogWidget);
     titleText->setTextPixelSize(20);
     titleText->setStyleSheet("font-weight: bold; color: #667eea;");
     dialogLayout->addWidget(titleText);
@@ -695,12 +381,12 @@ void LoginWindow::onAccountInfoButtonClicked()
     dialogLayout->addSpacing(10);
     
     // 学生账号说明
-    QWidget* studentSection = new QWidget(this);
+    QWidget* studentSection = new QWidget(dialogWidget);
     QVBoxLayout* studentLayout = new QVBoxLayout(studentSection);
     studentLayout->setSpacing(8);
     studentLayout->setContentsMargins(0, 0, 0, 0);
     
-    ElaText* studentTitle = new ElaText("📚 学生账号", this);
+    ElaText* studentTitle = new ElaText("📚 学生账号", studentSection);
     studentTitle->setTextPixelSize(16);
     studentTitle->setStyleSheet("font-weight: bold; color: #2c3e50;");
     studentLayout->addWidget(studentTitle);
@@ -710,7 +396,7 @@ void LoginWindow::onAccountInfoButtonClicked()
         "• 密码：与学号相同\n"
         "• 示例：学号 2021001，密码 2021001\n"
         "• 权限：只能查看和修改自己的信息\n"
-        "• 说明：首次登录时系统会自动创建账户", this);
+        "• 说明：首次登录时系统会自动创建账户", studentSection);
     studentInfo->setTextPixelSize(14);
     studentInfo->setStyleSheet("color: #34495e; line-height: 1.6;");
     studentLayout->addWidget(studentInfo);
@@ -719,12 +405,12 @@ void LoginWindow::onAccountInfoButtonClicked()
     dialogLayout->addSpacing(15);
     
     // 教师账号说明
-    QWidget* teacherSection = new QWidget(this);
+    QWidget* teacherSection = new QWidget(dialogWidget);
     QVBoxLayout* teacherLayout = new QVBoxLayout(teacherSection);
     teacherLayout->setSpacing(8);
     teacherLayout->setContentsMargins(0, 0, 0, 0);
     
-    ElaText* teacherTitle = new ElaText("👨‍🏫 教师账号", this);
+    ElaText* teacherTitle = new ElaText("👨‍🏫 教师账号", teacherSection);
     teacherTitle->setTextPixelSize(16);
     teacherTitle->setStyleSheet("font-weight: bold; color: #2c3e50;");
     teacherLayout->addWidget(teacherTitle);
@@ -736,7 +422,7 @@ void LoginWindow::onAccountInfoButtonClicked()
         "  - teacher / teacher（计算机科学专业）\n"
         "  - teacher2 / teacher2（软件工程专业）\n"
         "  - teacher3 / teacher3（信息安全专业）\n"
-        "• 权限：只能查看和管理自己专业的学生", this);
+        "• 权限：只能查看和管理自己专业的学生", teacherSection);
     teacherInfo->setTextPixelSize(14);
     teacherInfo->setStyleSheet("color: #34495e; line-height: 1.6;");
     teacherLayout->addWidget(teacherInfo);
@@ -745,12 +431,12 @@ void LoginWindow::onAccountInfoButtonClicked()
     dialogLayout->addSpacing(15);
     
     // 管理员账号说明
-    QWidget* adminSection = new QWidget(this);
+    QWidget* adminSection = new QWidget(dialogWidget);
     QVBoxLayout* adminLayout = new QVBoxLayout(adminSection);
     adminLayout->setSpacing(8);
     adminLayout->setContentsMargins(0, 0, 0, 0);
     
-    ElaText* adminTitle = new ElaText("👑 管理员账号", this);
+    ElaText* adminTitle = new ElaText("👑 管理员账号", adminSection);
     adminTitle->setTextPixelSize(16);
     adminTitle->setStyleSheet("font-weight: bold; color: #2c3e50;");
     adminLayout->addWidget(adminTitle);
@@ -758,7 +444,7 @@ void LoginWindow::onAccountInfoButtonClicked()
     ElaText* adminInfo = new ElaText(
         "• 登录方式：使用用户名登录\n"
         "• 默认账号：root / root\n"
-        "• 权限：拥有全部权限，可以管理所有学生", this);
+        "• 权限：拥有全部权限，可以管理所有学生", adminSection);
     adminInfo->setTextPixelSize(14);
     adminInfo->setStyleSheet("color: #34495e; line-height: 1.6;");
     adminLayout->addWidget(adminInfo);
@@ -767,7 +453,7 @@ void LoginWindow::onAccountInfoButtonClicked()
     dialogLayout->addSpacing(15);
     
     // 提示信息
-    ElaText* tipText = new ElaText("💡 提示：学生使用学号登录，密码与学号相同；教师和管理员使用用户名登录", this);
+    ElaText* tipText = new ElaText("💡 提示：学生使用学号登录，密码与学号相同；教师和管理员使用用户名登录", dialogWidget);
     tipText->setTextPixelSize(13);
     tipText->setStyleSheet("color: #e74c3c; font-weight: bold;");
     dialogLayout->addWidget(tipText);
@@ -778,8 +464,5 @@ void LoginWindow::onAccountInfoButtonClicked()
     dialog->setLeftButtonText("关闭");
     dialog->setRightButtonText("");
     
-    connect(dialog, &ElaContentDialog::leftButtonClicked, dialog, &ElaContentDialog::close);
-    
     dialog->exec();
-    dialog->deleteLater();
 }

@@ -52,7 +52,6 @@ private slots:
     void onBatchDelete();       // 批量删除学生
     void onBatchModifyMajor();  // 批量修改专业
     void onStudentEditInfo();   // 学生编辑自己的信息
-    void updateStudentInfoCard();  // 更新学生信息卡片显示
 
 private:
     Ui::MainWindow *ui;
@@ -86,19 +85,9 @@ private:
     QString currentUserStudentId;  // 当前用户关联的学生ID（仅学生角色）
     QString currentUserMajor;  // 当前用户关联的专业（仅教师角色）
     
-    // UI容器（用于学生角色隐藏输入表单）
+    // UI容器（用于不同角色的布局控制）
     QWidget* m_leftCardWidget;  // 左侧输入表单卡片
     QWidget* m_rightCardWidget;  // 右侧表格卡片
-    
-    // 学生角色专用UI
-    QWidget* m_studentInfoWidget;  // 学生信息展示卡片
-    FlatCardWidget* m_studentInfoCard;  // 学生信息卡片容器
-    ElaText* m_studentIdLabel;
-    ElaText* m_studentNameLabel;
-    ElaText* m_studentGenderLabel;
-    ElaText* m_studentAgeLabel;
-    ElaText* m_studentMajorLabel;
-    ElaPushButton* m_studentEditButton;  // 学生编辑按钮
     
     // 卡片式布局UI（用于教师和学生）
     QWidget* m_cardViewWidget;  // 卡片视图容器
