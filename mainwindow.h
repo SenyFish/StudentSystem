@@ -12,7 +12,7 @@
 #include "ElaContentDialog.h"
 #include "cardwidget.h"
 #include "flatcardwidget.h"
-#include "ElaInteractiveCard.h"
+// #include "ElaInteractiveCard.h"
 #include "ElaScrollArea.h"
 #include <QStandardItemModel>
 #include <QGridLayout>
@@ -94,7 +94,7 @@ private:
     ElaScrollArea* m_cardScrollArea;  // 卡片滚动区域
     QWidget* m_cardContainer;  // 卡片容器
     QGridLayout* m_cardLayout;  // 卡片网格布局
-    QVector<ElaInteractiveCard*> m_studentCards;  // 学生卡片列表
+    // QVector<ElaInteractiveCard*> m_studentCards;  // 学生卡片列表
     
     // 主题切换防抖
     bool m_isThemeChanging;  // 标记主题切换是否正在进行

@@ -12,6 +12,7 @@
 #include "ElaSpinBox.h"
 #include "usermanager.h"
 #include "operationlog.h"
+#include "ModernAvatar.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -184,7 +185,7 @@ void MainWindow::setUserRole(UserRole role, const QString &studentId, const QStr
         }
     }
     
-    // 学生角色：只能查看和修改自己的信息
+    // 学生角色：只能查看自己的信息，无法编辑
     // 教师角色：可以查看、添加、修改，不能删除
     // 管理员角色：全部权限
     
@@ -953,7 +954,7 @@ void MainWindow::updateCardView()
         }
         delete item;
     }
-    m_studentCards.clear();
+    // m_studentCards.clear();
     
     // 收集要显示的学生
     QVector<const Student*> displayStudents;
@@ -996,27 +997,9 @@ void MainWindow::updateCardView()
         QHBoxLayout* headerLayout = new QHBoxLayout();
         headerLayout->setSpacing(30);
         
-        // 创建大尺寸头像（150x150）
-        QLabel* avatarLabel = new QLabel(mainCard);
-        avatarLabel->setFixedSize(150, 150);
-        QPixmap avatar(150, 150);
-        avatar.fill(Qt::transparent);
-        QPainter painter(&avatar);
-        QLinearGradient gradient(0, 0, 150, 150);
-        if (student->getGender() == "男") {
-            gradient.setColorAt(0, QColor(102, 126, 234));  // 蓝色
-            gradient.setColorAt(1, QColor(118, 75, 162));   // 紫色
-        } else {
-            gradient.setColorAt(0, QColor(250, 112, 154));  // 粉色
-            gradient.setColorAt(1, QColor(254, 225, 64));   // 黄色
-        }
-        painter.setBrush(gradient);
-        painter.setPen(Qt::NoPen);
-        painter.drawEllipse(0, 0, 150, 150);
-        painter.end();
-        avatarLabel->setPixmap(avatar);
-        avatarLabel->setScaledContents(true);
-        avatarLabel->setStyleSheet("border-radius: 75px;");
+        // 创建大尺寸头像（150x150） - 使用现代动画头像
+        ModernAvatar* avatarWidget = new ModernAvatar(mainCard);
+        avatarWidget->setGender(student->getGender());
         
         // 姓名区域
         QVBoxLayout* nameLayout = new QVBoxLayout();
@@ -1035,7 +1018,7 @@ void MainWindow::updateCardView()
         nameLayout->addWidget(idText);
         nameLayout->addStretch();
         
-        headerLayout->addWidget(avatarLabel);
+        headerLayout->addWidget(avatarWidget);
         headerLayout->addLayout(nameLayout);
         headerLayout->addStretch();
         
@@ -1105,46 +1088,6 @@ void MainWindow::updateCardView()
         
         mainCardLayout->addLayout(infoGridLayout);
         
-        // === 编辑按钮 ===
-        QHBoxLayout* buttonLayout = new QHBoxLayout();
-        buttonLayout->addStretch();
-        
-        ElaPushButton* editButton = new ElaPushButton("编辑信息", mainCard);
-        editButton->setFixedSize(200, 50);
-        editButton->setStyleSheet(R"(
-            ElaPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                           stop:0 #667eea, stop:1 #764ba2);
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-            }
-            ElaPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                           stop:0 #7a8df5, stop:1 #8a5fb8);
-            }
-        )");
-        QGraphicsDropShadowEffect *buttonShadow = new QGraphicsDropShadowEffect(editButton);
-        buttonShadow->setBlurRadius(20);
-        buttonShadow->setColor(QColor(102, 126, 234, 150));
-        buttonShadow->setOffset(0, 5);
-        editButton->setGraphicsEffect(buttonShadow);
-        
-        connect(editButton, &ElaPushButton::clicked, this, [this, student]() {
-            lineEditId->setText(student->getId());
-            lineEditName->setText(student->getName());
-            comboBoxGender->setCurrentText(student->getGender());
-            spinBoxAge->setValue(student->getAge());
-            comboBoxMajor->setCurrentText(student->getMajor());
-            currentEditingStudentId = student->getId();
-            onStudentEditInfo();
-        });
-        
-        buttonLayout->addWidget(editButton);
-        buttonLayout->addStretch();
-        
-        mainCardLayout->addLayout(buttonLayout);
         mainCardLayout->addStretch();
         
         // 添加到网格布局（学生角色居中显示）
@@ -1153,48 +1096,56 @@ void MainWindow::updateCardView()
         // 保存引用（虽然类型不同，但我们需要存储）
         // 这里我们暂时不添加到m_studentCards，因为类型不匹配
     }
-    // 教师角色：保持原有的卡片布局
+    // 教师角色：使用现代化的卡片列表布局
     else if (!isStudent) {
         for (int i = 0; i < displayStudents.size(); ++i) {
             const Student* student = displayStudents[i];
             
-            ElaInteractiveCard* card = new ElaInteractiveCard(m_cardContainer);
-            card->setFixedSize(300, 200);
+            // 创建扁平卡片容器
+            FlatCardWidget* card = new FlatCardWidget(m_cardContainer);
+            card->setFixedSize(320, 130);
+            card->setElevation(1);
             
-            // 创建学生头像
-            QPixmap avatar(60, 60);
-            avatar.fill(Qt::transparent);
-            QPainter painter(&avatar);
-            QLinearGradient gradient(0, 0, 60, 60);
-            if (student->getGender() == "男") {
-                gradient.setColorAt(0, QColor(102, 126, 234));
-                gradient.setColorAt(1, QColor(118, 75, 162));
-            } else {
-                gradient.setColorAt(0, QColor(250, 112, 154));
-                gradient.setColorAt(1, QColor(254, 225, 64));
-            }
-            painter.setBrush(gradient);
-            painter.setPen(Qt::NoPen);
-            painter.drawEllipse(0, 0, 60, 60);
-            painter.end();
+            QHBoxLayout* cardLayout = new QHBoxLayout(card);
+            cardLayout->setContentsMargins(15, 15, 15, 15);
+            cardLayout->setSpacing(15);
             
-            card->setCardPixmap(avatar);
-            card->setCardPixmapSize(60, 60);
-            card->setTitle(student->getName());
-            card->setSubTitle(QString("学号：%1\n性别：%2 | 年龄：%3岁\n专业：%4")
-                              .arg(student->getId())
-                              .arg(student->getGender())
-                              .arg(student->getAge())
-                              .arg(student->getMajor()));
-            card->setTitlePixelSize(18);
-            card->setSubTitlePixelSize(13);
-            card->setTitleSpacing(8);
-            card->setBorderRadius(12);
+            // 动态头像
+            ModernAvatar* avatarWidget = new ModernAvatar(card);
+            avatarWidget->setFixedSize(80, 80);
+            avatarWidget->setGender(student->getGender());
+            
+            // 信息布局
+            QVBoxLayout* infoLayout = new QVBoxLayout();
+            infoLayout->setSpacing(5);
+            infoLayout->setAlignment(Qt::AlignVCenter);
+            
+            // 姓名
+            ElaText* nameText = new ElaText(student->getName(), card);
+            nameText->setTextPixelSize(18);
+            nameText->setStyleSheet("font-weight: bold; color: #333;");
+            
+            // 学号
+            ElaText* idText = new ElaText(QString("学号：%1").arg(student->getId()), card);
+            idText->setTextPixelSize(13);
+            idText->setStyleSheet("color: #888;");
+            
+            // 专业和性别
+            ElaText* detailsText = new ElaText(QString("%1 | %2 | %3岁").arg(student->getMajor()).arg(student->getGender()).arg(student->getAge()), card);
+            detailsText->setTextPixelSize(13);
+            detailsText->setStyleSheet("color: #666;");
+            
+            infoLayout->addWidget(nameText);
+            infoLayout->addWidget(idText);
+            infoLayout->addWidget(detailsText);
+            infoLayout->addStretch();
+            
+            cardLayout->addWidget(avatarWidget);
+            cardLayout->addLayout(infoLayout);
             
             int row = i / colCount;
             int col = i % colCount;
             m_cardLayout->addWidget(card, row, col);
-            m_studentCards.append(card);
         }
     }
     
@@ -1929,6 +1880,12 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
 
 void MainWindow::onStudentEditInfo()
 {
+    // 学生角色不允许编辑信息
+    if (currentUserRole == UserRole::Student) {
+        ElaMessageBar::warning(ElaMessageBarType::TopRight, "权限不足", "学生角色无法编辑信息！", 2000, this);
+        return;
+    }
+    
     if (currentUserStudentId.isEmpty()) {
         ElaMessageBar::warning(ElaMessageBarType::TopRight, "编辑失败", "未找到您的学生信息！", 2000, this);
         return;

@@ -33,6 +33,8 @@ set(PROJECT_SOURCES
         usermanager.h
         operationlog.cpp
         operationlog.h
+        ModernAvatar.cpp
+        ModernAvatar.h
         resources.qrc
 )
 
